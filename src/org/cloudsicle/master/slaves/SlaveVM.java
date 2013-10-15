@@ -19,12 +19,24 @@ public class SlaveVM {
 	
 	private boolean inUse = false;
 	
+	/**
+	 * Set up a slave VM
+	 * 
+	 * @param client The open nebula client
+	 * @throws UninstantiableException If something went wrong when initializing
+	 */
 	public SlaveVM(Client client) throws UninstantiableException{
 		setUpId(client);
 		setUpVm(client);
 		setUpIp();
 	}
 	
+	/**
+	 * Set up a new VM id
+	 * 
+	 * @param client The open nebula client
+	 * @throws UninstantiableException If something went wrong when requesting a new id
+	 */
 	private void setUpId(Client client) throws UninstantiableException{
 		ClassLoader cl = SlaveVM.class.getClassLoader();
 		String vmTemplate = new Scanner(cl.getResourceAsStream("centos-smallnet-qcow2.one")).useDelimiter("\\A").next();
@@ -36,6 +48,12 @@ public class SlaveVM {
 		id = Integer.parseInt(rc.getMessage());
 	}
 	
+	/**
+	 * Set up a VirtualMachine object for this id
+	 * 
+	 * @param client The open nebula client
+	 * @throws UninstantiableException If something went wrong when holding a VM
+	 */
 	private void setUpVm(Client client) throws UninstantiableException{
 		vm = new VirtualMachine(id, client);
 		
@@ -44,6 +62,11 @@ public class SlaveVM {
 			throw new UninstantiableException();
 	}
 	
+	/**
+	 * Set up the VM ip
+	 * 
+	 * @throws UninstantiableException If something went wrong when interpreting the VM IP
+	 */
 	private void setUpIp() throws UninstantiableException{
 		OneResponse rc = vm.info();			
 
@@ -63,22 +86,39 @@ public class SlaveVM {
 		
 	}
 	
+	/**
+	 * Flag if this VM is currently in use by the scheduler
+	 * 
+	 * @param b New value
+	 */
 	public void setIsInUse(boolean b){
 		this.inUse = b;
 	}
 	
+	/**
+	 * @return Whether this VM is in use by the scheduler
+	 */
 	public boolean isInUse(){
 		return inUse;
 	}
 
+	/**
+	 * @return The id of this VM
+	 */
 	public int getId() {
 		return id;
 	}
 
+	/**
+	 * @return The open nebula API VM object we own
+	 */
 	public VirtualMachine getVm() {
 		return vm;
 	}
 
+	/**
+	 * The ip of the VM
+	 */
 	public InetAddress getIp() {
 		return ip;
 	}
