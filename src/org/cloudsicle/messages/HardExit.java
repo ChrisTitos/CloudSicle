@@ -1,4 +1,4 @@
-package org.cloudsicle.master.slaves.messages;
+package org.cloudsicle.messages;
 
 /**
  * Shut down immediately (state independent)

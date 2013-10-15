@@ -1,4 +1,4 @@
-package org.cloudsicle.master.slaves.messages;
+package org.cloudsicle.messages;
 
 /**
  * Allow current state chain to finish then shut down.
