@@ -5,8 +5,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class Slave {
+import org.cloudsicle.communication.IMessageHandler;
+import org.cloudsicle.communication.SocketListener;
+import org.cloudsicle.messages.Activity;
+import org.cloudsicle.messages.IMessage;
+import org.cloudsicle.messages.SoftExit;
 
+public class Slave implements IMessageHandler{
+
+	private SocketListener listener;
+	
 	/**
 	 * Initialize our Slave
 	 * 
@@ -14,6 +22,7 @@ public class Slave {
 	 */
 	public Slave() throws IOException{
 		deployExecutable();
+		listener = new SocketListener(this, 17123);
 	}
 	
 	/**
@@ -29,12 +38,23 @@ public class Slave {
 		is.close();
 	}
 	
+	
+	
+	@Override
+	public void process(IMessage message) {
+		if (message instanceof Activity){
+			// TODO
+		} else if (message instanceof SoftExit){
+			// TODO
+		}
+	}
+
 	/**
 	 * @param args
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+	public static void main(String[] args) throws IOException {
+		Slave slave = new Slave();
 	}
 
 }
