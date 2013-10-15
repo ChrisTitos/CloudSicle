@@ -1,5 +1,5 @@
 package org.cloudsicle.messages;
 
-public class JobMetaData {
+public class JobMetaData implements IMessage {
 
 }
