@@ -123,4 +123,11 @@ public class SlaveVM {
 		return ip;
 	}
 	
+	/**
+	 * Stateless exit
+	 */
+	public void hardExit(){
+		vm.delete();
+	}
+	
 }
