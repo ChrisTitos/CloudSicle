@@ -1,7 +1,5 @@
 package org.cloudsicle.main.entrypoints;
 
-import java.io.IOException;
-
 import org.cloudsicle.communication.IMessageHandler;
 import org.cloudsicle.communication.SocketListener;
 import org.cloudsicle.master.Scheduler;

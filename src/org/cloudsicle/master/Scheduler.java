@@ -11,6 +11,10 @@ public class Scheduler implements Runnable {
 	private ResourcePool pool;
 	private PriorityBlockingQueue<JobMetaData> metaJobQueue;
 	
+	/**
+	 * Instantiate a new Scheduler.
+	 * @throws ClientConfigurationException
+	 */
 	public Scheduler() throws ClientConfigurationException{
 		this.pool = new ResourcePool();
 		this.metaJobQueue = new PriorityBlockingQueue<JobMetaData>();
@@ -18,6 +22,10 @@ public class Scheduler implements Runnable {
 		new Thread(this).start();
 	}
 	
+	/**
+	 * Add JobMetaData that has to be scheduled.
+	 * @param metajob
+	 */
 	public void schedule(JobMetaData metajob){
 		this.metaJobQueue.put(metajob);
 	}
