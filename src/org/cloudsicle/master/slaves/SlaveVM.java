@@ -5,8 +5,4 @@ package org.cloudsicle.master.slaves;
  */
 public class SlaveVM {
 
-	
-	public enum States {
-		WAITING, RUNNING;
-	}
 }
