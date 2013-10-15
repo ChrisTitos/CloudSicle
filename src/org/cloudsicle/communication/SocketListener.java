@@ -12,9 +12,11 @@ import org.cloudsicle.messages.IMessage;
 public class SocketListener extends Thread {
 
 	private ServerSocket serverSocket;
+	private IMessageHandler mHandler;
 
-	public SocketListener(int port) throws IOException {
+	public SocketListener(IMessageHandler m, int port) throws IOException {
 		serverSocket = new ServerSocket(port);
+		mHandler = m;
 	}
 
 	public void run() {
@@ -22,7 +24,7 @@ public class SocketListener extends Thread {
 			try {
 				Socket s = serverSocket.accept();
 
-				Thread t = new Thread(new SocketThread(s));
+				Thread t = new Thread(new SocketThread(s, this.mHandler));
 				t.start();
 			} catch (SocketTimeoutException s) {
 			} catch (Exception e) {
@@ -36,9 +38,9 @@ public class SocketListener extends Thread {
 		private Socket socket;
 		private IMessageHandler mHandler;
 
-		public SocketThread(Socket s) {
+		public SocketThread(Socket s, IMessageHandler mh) {
 			socket = s;
-			/* TODO add implementation of IMessageHandler */
+			mHandler = mh;
 		}
 
 		@Override
