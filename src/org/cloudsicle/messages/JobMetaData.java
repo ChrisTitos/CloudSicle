@@ -1,6 +1,7 @@
 package org.cloudsicle.messages;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 
 /**
  * The JobMetaData is presented to the master by the client so that the master can allocate
@@ -13,6 +14,7 @@ public class JobMetaData implements IMessage {
 	private InetAddress client;
 	private int totalFileSize;
 	private int numFiles;
+	private ArrayList<String> files;
 	
 	/**
 	 * 
@@ -39,11 +41,19 @@ public class JobMetaData implements IMessage {
 	}
 
 	public int getNumFiles() {
-		return numFiles;
+		return this.files.size();
 	}
-
-	public void setNumFiles(int numFiles) {
-		this.numFiles = numFiles;
+	
+	public ArrayList<String> getFiles(){
+		return this.files;
+	}
+	
+	/**
+	 * Pass an ArrayList of <i>filenames</i>, <b>not actual files!</b>
+	 * @param files
+	 */
+	public void setFiles(ArrayList<String> files){
+		
 	}
 
 
