@@ -1,5 +1,7 @@
 package org.cloudsicle.messages;
 
-public interface IMessage {
+import java.io.Serializable;
+
+public interface IMessage extends Serializable {
 
 }
