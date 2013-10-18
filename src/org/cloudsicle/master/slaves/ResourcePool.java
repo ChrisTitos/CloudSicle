@@ -46,6 +46,7 @@ public class ResourcePool {
 	private SlaveVM addVM() throws UninstantiableException{
 		SlaveVM slave = new SlaveVM(openNebula);
 		vmsInUse.add(slave);
+		slave.initialize();
 		return slave;
 	}
 	

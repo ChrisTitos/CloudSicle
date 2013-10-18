@@ -1,5 +1,6 @@
 package org.cloudsicle.master.slaves;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Scanner;
@@ -128,6 +129,29 @@ public class SlaveVM {
 	 */
 	public void hardExit(){
 		vm.delete();
+	}
+	
+	/**
+	 * Create the ssh command to launch the remote jar on the slave
+	 */
+	private String buildCommand(){
+		return "ssh root@"
+				+ ip
+				+" \"java -jar slave.jar\"";
+	}
+	
+	/**
+	 * Start the remote jar file
+	 * 
+	 * @return Whether we succeeded in starting the remote jar
+	 */
+	public boolean initialize(){
+		try {
+			Process p = Runtime.getRuntime().exec(buildCommand());
+			return true;
+		} catch (IOException e){
+			return false;
+		}
 	}
 	
 }
