@@ -16,6 +16,7 @@ public class SocketListener extends Thread {
 
 	public SocketListener(IMessageHandler m, int port) throws IOException {
 		serverSocket = new ServerSocket(port);
+		System.out.println("LISTENING ON: " + serverSocket.getInetAddress() + ":" + serverSocket.getLocalPort());
 		mHandler = m;
 	}
 	
