@@ -137,6 +137,9 @@ public class SlaveVM {
 	private String buildCommand(){
 		return "ssh root@"
 				+ ip
+				+ " \"cat > slave.jar\" < slave.jar"
+				+ ";ssh root@"
+				+ ip
 				+" \"java -jar slave.jar\"";
 	}
 	

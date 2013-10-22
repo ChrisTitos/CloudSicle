@@ -30,6 +30,7 @@ import javax.swing.event.CaretListener;
 import javax.swing.event.CaretEvent;
 
 import org.cloudsicle.client.Session;
+import org.cloudsicle.communication.SocketSender;
 
 public class Frontend extends JFrame {
 
@@ -43,11 +44,11 @@ public class Frontend extends JFrame {
 	/**
 	 * Launch the application.
 	 */
-	public static void launch() {
+	public static void launch(final Session s) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Frontend frame = new Frontend();
+					Frontend frame = new Frontend(s);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -194,11 +195,11 @@ public class Frontend extends JFrame {
 					return;
 				}
 				
-				ArrayList<File> files = new ArrayList<File>();
+				ArrayList<String> files = new ArrayList<String>();
 				DefaultListModel<String> listModel = (DefaultListModel<String>) list.getModel();
 				for (int i = 0; i < listModel.getSize(); i++){
 					String file = listModel.getElementAt(i);
-					files.add(new File(file));
+					files.add(file);
 				}
 				InetAddress ia;
 				try {
@@ -207,8 +208,9 @@ public class Frontend extends JFrame {
 					JOptionPane.showMessageDialog(null, "Could not submit the job because the master IP could not be read.", "Woops..", JOptionPane.ERROR_MESSAGE); 
 					return;
 				}
-				
-				session.requestCloudSicle(files, ia);
+
+				if (!session.requestCloudSicle(files, ia))
+					JOptionPane.showMessageDialog(null, "Failed to submit job, could not connect to server.", "Woops..", JOptionPane.ERROR_MESSAGE);
 			}
 		});
 		panel.add(btnPerformCloudsicling);

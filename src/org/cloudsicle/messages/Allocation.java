@@ -1,8 +1,8 @@
 package org.cloudsicle.messages;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.cloudsicle.master.slaves.SlaveVM;
 
@@ -13,17 +13,17 @@ public class Allocation implements IMessage {
 	/**
 	 * A hashmap that maps the VM's to a list of files allocated for that VM
 	 */
-	private HashMap<InetAddress, ArrayList<String>> allocations;
+	private HashMap<InetAddress, List<String>> allocations;
 	
 	public Allocation(){
-		allocations = new HashMap<InetAddress, ArrayList<String>>();
+		allocations = new HashMap<InetAddress, List<String>>();
 	}
 	
-	public void allocate(SlaveVM vm, ArrayList<String> files){
-		allocations.put(vm.getIp(), files);
+	public void allocate(SlaveVM vm, List<String> list){
+		allocations.put(vm.getIp(), list);
 	}
 	
-	public HashMap<InetAddress, ArrayList<String>> getAllocations(){
+	public HashMap<InetAddress, List<String>> getAllocations(){
 		return this.allocations;
 	}
 

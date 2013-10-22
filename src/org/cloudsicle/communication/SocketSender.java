@@ -16,6 +16,16 @@ public class SocketSender {
 	private int port;
 	
 	/**
+	 * Initialize the SocketSender for a specific target, with default port
+	 * 
+	 * @param receiver The target's InetAddress
+	 */
+	public SocketSender(InetAddress receiver){
+		this.receiver = receiver;
+		this.port = 21007;
+	}
+	
+	/**
 	 * Initialize the SocketSender for a specific target
 	 * 
 	 * @param receiver The target's InetAddress
