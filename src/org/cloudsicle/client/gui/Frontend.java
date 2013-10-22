@@ -30,7 +30,6 @@ import javax.swing.event.CaretListener;
 import javax.swing.event.CaretEvent;
 
 import org.cloudsicle.client.Session;
-import org.cloudsicle.communication.SocketSender;
 
 public class Frontend extends JFrame {
 
@@ -155,6 +154,10 @@ public class Frontend extends JFrame {
 				try {
 					i4a = (Inet4Address) Inet4Address.getByName(ip);
 				} catch (UnknownHostException e) {
+					textField.setBackground(Color.RED);
+					return;
+				}
+				if (!ip.matches("[0-9][0-9]?[0-9]?[.][0-9][0-9]?[0-9]?[.][0-9][0-9]?[0-9]?[.][0-9][0-9]?[0-9]?")) {
 					textField.setBackground(Color.RED);
 					return;
 				}

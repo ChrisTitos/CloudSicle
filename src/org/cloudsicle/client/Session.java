@@ -44,7 +44,7 @@ public class Session {
 		request.setTotalFileSize(totalFileSize(files));
 		
 		try {
-			SocketSender sender = new SocketSender(server);
+			SocketSender sender = new SocketSender(true, server);
 			sender.send(request);
 			return true;
 		} catch (IOException e) {

@@ -53,9 +53,11 @@ public class SocketListener extends Thread {
 			try {
 				InputStream is = socket.getInputStream();
 				ObjectInputStream ois = new ObjectInputStream(is);
+
 				IMessage message = (IMessage) ois.readObject();
 				if (message instanceof INeedOwnIP)
 					((INeedOwnIP) message).setIP(socket.getInetAddress());
+				
 				mHandler.process(message);
 	            socket.close();
 

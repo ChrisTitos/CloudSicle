@@ -1,7 +1,6 @@
 package org.cloudsicle.messages;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.cloudsicle.communication.INeedOwnIP;

@@ -1,8 +1,6 @@
 package org.cloudsicle.communication;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -20,14 +18,15 @@ public class SocketSender {
 	
 	private InetAddress receiver;
 	private int port;
+	private boolean useSSH;
 	
 	/**
 	 * Initialize the SocketSender for a specific target, with default port
 	 * 
 	 * @param receiver The target's InetAddress
 	 */
-	public SocketSender(InetAddress receiver){
-		this(receiver, DefaultNetworkVariables.DEFAULT_PORT);
+	public SocketSender(boolean useSSH, InetAddress receiver){
+		this(useSSH, receiver, DefaultNetworkVariables.DEFAULT_PORT);
 	}
 	
 	/**
@@ -36,9 +35,23 @@ public class SocketSender {
 	 * @param receiver The target's InetAddress
 	 * @param port The target's port
 	 */
-	public SocketSender(InetAddress receiver, int port){
+	public SocketSender(boolean useSSH, InetAddress receiver, int port){
 		this.receiver = receiver;
 		this.port = port;
+		this.useSSH = useSSH;
+	}
+	
+	/**
+	 * Send a message to our target.
+	 * 
+	 * @param message The message to be sent
+	 * @throws IOException If something went wrong sending
+	 */
+	public void send(IMessage message) throws IOException, JSchException{
+		if (useSSH)
+			sendSSH(message);
+		else
+			sendSock(message);
 	}
 	
 	/**
@@ -48,15 +61,8 @@ public class SocketSender {
 	 * @throws IOException If something went wrong sending
 	 * @throws JSchException 
 	 */
-	public void send(IMessage message) throws IOException, JSchException{
-		Socket s = new Socket(receiver, port);
-		System.out.println("DEBUG: SOCKET: ESTABLISHED CONNECTION");
-		ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
-		oos.writeObject(message);
-		oos.close();
-		s.close();
-		
-		/*JSch jsch = new JSch();
+	public void sendSSH(IMessage message) throws IOException, JSchException{
+		JSch jsch = new JSch();
 		Session session=jsch.getSession("in439204", receiver.getHostAddress(), 22);
 
 		session.setPassword("Pkk6gE5g");
@@ -66,18 +72,38 @@ public class SocketSender {
 		PipedInputStream pis = new PipedInputStream();
 		PipedOutputStream pos = new PipedOutputStream(pis);
 		ObjectOutputStream oos = new ObjectOutputStream(pos);
-		ObjectInputStream is = new ObjectInputStream(pis);
 		
 		Channel channel = session.getStreamForwarder(receiver.getHostAddress(), port);
-		channel.setInputStream(is);
-		channel.setOutputStream(System.out);
+		channel.setInputStream(pis);
 		channel.connect(1000);
 		
 		oos.writeObject(message);
-		
+
 		oos.close();
-		is.close();
-		channel.disconnect();*/
+
+		while (!channel.isClosed())
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				break;
+			}
+		
+		channel.disconnect();
+	}
+	
+	/**
+	 * Send a message to our target.
+	 * 
+	 * @param message The message to be sent
+	 * @throws IOException If something went wrong sending
+	 */
+	public void sendSock(IMessage message) throws IOException{
+		Socket s = new Socket(receiver, port);
+		ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+		oos.writeObject(message);
+		oos.close();
+		s.close();
 	}
 
 }

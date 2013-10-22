@@ -54,7 +54,7 @@ public class Slave implements IMessageHandler{
 		if (message instanceof Activity){
 			try {
 			StatusUpdate status = new StatusUpdate("VM Received Activity");
-			SocketSender sender = new SocketSender(((Activity) message).getIP());		
+			SocketSender sender = new SocketSender(false, ((Activity) message).getIP());		
 			
 			//ArrayList<IJob> jobs = ((Activity) message).getJobs();
 			
