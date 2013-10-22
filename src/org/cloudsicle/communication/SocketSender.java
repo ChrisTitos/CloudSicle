@@ -21,8 +21,7 @@ public class SocketSender {
 	 * @param receiver The target's InetAddress
 	 */
 	public SocketSender(InetAddress receiver){
-		this.receiver = receiver;
-		this.port = 21007;
+		this(receiver, DefaultNetworkVariables.DEFAULT_PORT);
 	}
 	
 	/**

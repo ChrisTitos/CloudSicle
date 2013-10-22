@@ -18,6 +18,10 @@ public class SocketListener extends Thread {
 		serverSocket = new ServerSocket(port);
 		mHandler = m;
 	}
+	
+	public SocketListener(IMessageHandler m) throws IOException {
+		this(m, DefaultNetworkVariables.DEFAULT_PORT);
+	}
 
 	public void run() {
 		while (true) {
