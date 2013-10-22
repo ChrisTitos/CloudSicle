@@ -29,8 +29,10 @@ public class Slave implements IMessageHandler{
 	 * Copy our gifsicle executable from the jar to the environment
 	 */
 	private void deployExecutable() throws IOException{
-		InputStream is = Slave.class.getResourceAsStream("gifsicle");
-		FileOutputStream fos = new FileOutputStream(new File("~/gifsicle"));
+		InputStream is = Slave.class.getResourceAsStream(File.separator + "gifsicle");
+		File f = new File("gifsicle");
+		f.createNewFile();
+		FileOutputStream fos = new FileOutputStream("gifsicle");
 		while (is.available() > 0)
 			fos.write(is.read());
 		fos.flush();
