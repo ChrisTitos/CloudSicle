@@ -4,12 +4,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import org.cloudsicle.communication.IMessageHandler;
 import org.cloudsicle.communication.SocketListener;
 import org.cloudsicle.communication.SocketSender;
+import org.cloudsicle.main.jobs.IJob;
 import org.cloudsicle.messages.Activity;
-import org.cloudsicle.messages.Allocation;
 import org.cloudsicle.messages.IMessage;
 import org.cloudsicle.messages.SoftExit;
 import org.cloudsicle.messages.StatusUpdate;
@@ -48,9 +49,12 @@ public class Slave implements IMessageHandler{
 	@Override
 	public void process(IMessage message) {
 		if (message instanceof Activity){
-			StatusUpdate status = new StatusUpdate("VM Received Activity");
-			SocketSender sender = new SocketSender(((Activity) message).getIP());						
 			try {
+			StatusUpdate status = new StatusUpdate("VM Received Activity");
+			SocketSender sender = new SocketSender(((Activity) message).getIP());		
+			
+			//ArrayList<IJob> jobs = ((Activity) message).getJobs();
+			
 				sender.send(status);
 			} catch (IOException e) {
 				e.printStackTrace();
