@@ -27,7 +27,7 @@ public class SocketListener extends Thread {
 		while (true) {
 			try {
 				Socket s = serverSocket.accept();
-
+				System.out.println("DEBUG: SERVERSOCKET: ACCEPTED CONNECTION");
 				Thread t = new Thread(new SocketThread(s, this.mHandler));
 				t.start();
 			} catch (SocketTimeoutException s) {

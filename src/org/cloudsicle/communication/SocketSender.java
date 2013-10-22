@@ -43,6 +43,7 @@ public class SocketSender {
 	 */
 	public void send(IMessage message) throws IOException{
 		Socket s = new Socket(receiver, port);
+		System.out.println("DEBUG: SOCKET: ESTABLISHED CONNECTION");
 		ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
 		oos.writeObject(message);
 		oos.close();
