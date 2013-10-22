@@ -28,7 +28,7 @@ public class Slave implements IMessageHandler{
 	 */
 	public Slave() throws IOException{
 		deployExecutable();
-		listener = new SocketListener(this, 17123);
+		listener = new SocketListener(this);
 		listener.start();
 	}
 	
