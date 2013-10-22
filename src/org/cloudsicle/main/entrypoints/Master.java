@@ -20,6 +20,7 @@ public class Master implements IMessageHandler {
 	@Override
 	public void process(IMessage message) {		
 		if(message instanceof JobMetaData){
+			System.out.println("DEBUG: Received message!");
 			this.scheduler.schedule((JobMetaData) message);
 		} else if(message instanceof StatusUpdate){
 			System.out.println(((StatusUpdate) message).getMessage());

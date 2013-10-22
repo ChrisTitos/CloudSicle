@@ -59,46 +59,9 @@ public class SocketSender {
 		
 		JSch jsch = new JSch();
 		Session session=jsch.getSession("in439204", receiver.getHostAddress(), 22);
-		
-		UserInfo ui=new UserInfo(){
 
-			@Override
-			public String getPassphrase() {
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public String getPassword() {
-				return "Pkk6gE5g";
-			}
-
-			@Override
-			public boolean promptPassphrase(String arg0) {
-				// TODO Auto-generated method stub
-				return false;
-			}
-
-			@Override
-			public boolean promptPassword(String arg0) {
-				// TODO Auto-generated method stub
-				return false;
-			}
-
-			@Override
-			public boolean promptYesNo(String arg0) {
-				// TODO Auto-generated method stub
-				return false;
-			}
-
-			@Override
-			public void showMessage(String arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-		};
-		session.setUserInfo(ui);
+		session.setPassword("Pkk6gE5g");
+		session.setConfig("StrictHostKeyChecking", "no");
 		session.connect();
 		
 		PipedInputStream pis = new PipedInputStream();

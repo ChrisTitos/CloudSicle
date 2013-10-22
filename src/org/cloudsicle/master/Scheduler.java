@@ -10,6 +10,8 @@ import org.cloudsicle.messages.Allocation;
 import org.cloudsicle.messages.JobMetaData;
 import org.opennebula.client.ClientConfigurationException;
 
+import com.jcraft.jsch.JSchException;
+
 public class Scheduler implements Runnable {
 	
 	private ResourcePool pool;
@@ -57,6 +59,8 @@ public class Scheduler implements Runnable {
 					try {
 						sender.send(alloc);
 					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (JSchException e) {
 						e.printStackTrace();
 					}
 					

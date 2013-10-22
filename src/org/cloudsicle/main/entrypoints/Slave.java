@@ -15,6 +15,8 @@ import org.cloudsicle.messages.IMessage;
 import org.cloudsicle.messages.SoftExit;
 import org.cloudsicle.messages.StatusUpdate;
 
+import com.jcraft.jsch.JSchException;
+
 public class Slave implements IMessageHandler{
 
 	private SocketListener listener;
@@ -57,6 +59,8 @@ public class Slave implements IMessageHandler{
 			
 				sender.send(status);
 			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (JSchException e) {
 				e.printStackTrace();
 			}
 		} else if (message instanceof SoftExit){
