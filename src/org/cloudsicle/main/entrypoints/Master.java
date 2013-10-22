@@ -5,23 +5,24 @@ import org.cloudsicle.communication.SocketListener;
 import org.cloudsicle.master.Scheduler;
 import org.cloudsicle.messages.IMessage;
 import org.cloudsicle.messages.JobMetaData;
+import org.cloudsicle.messages.StatusUpdate;
 
 public class Master implements IMessageHandler {
 
 	private Scheduler scheduler;
 	private SocketListener listener;
 	
-	private final static int port = 1;
-
 	public Master() throws Exception {
 		this.scheduler = new Scheduler();
-		this.listener = new SocketListener(this, port);
+		this.listener = new SocketListener(this);
 	}
 	
 	@Override
 	public void process(IMessage message) {		
 		if(message instanceof JobMetaData){
 			this.scheduler.schedule((JobMetaData) message);
+		} else if(message instanceof StatusUpdate){
+			System.out.println(((StatusUpdate) message).getMessage());
 		}
 	}
 
@@ -31,7 +32,7 @@ public class Master implements IMessageHandler {
 	public static void main(String[] args) {
 		try {
 			Master master = new Master();
-		} catch (Exception e) {
+					} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

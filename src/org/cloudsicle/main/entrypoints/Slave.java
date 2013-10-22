@@ -7,9 +7,12 @@ import java.io.InputStream;
 
 import org.cloudsicle.communication.IMessageHandler;
 import org.cloudsicle.communication.SocketListener;
+import org.cloudsicle.communication.SocketSender;
 import org.cloudsicle.messages.Activity;
+import org.cloudsicle.messages.Allocation;
 import org.cloudsicle.messages.IMessage;
 import org.cloudsicle.messages.SoftExit;
+import org.cloudsicle.messages.StatusUpdate;
 
 public class Slave implements IMessageHandler{
 
@@ -45,7 +48,13 @@ public class Slave implements IMessageHandler{
 	@Override
 	public void process(IMessage message) {
 		if (message instanceof Activity){
-			// TODO
+			StatusUpdate status = new StatusUpdate("VM Received Activity");
+			SocketSender sender = new SocketSender(((Activity) message).getIP());						
+			try {
+				sender.send(status);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		} else if (message instanceof SoftExit){
 			// TODO
 		}
