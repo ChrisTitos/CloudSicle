@@ -15,6 +15,7 @@ public class Master implements IMessageHandler {
 	public Master() throws Exception {
 		this.scheduler = new Scheduler();
 		this.listener = new SocketListener(this);
+		listener.start();
 	}
 	
 	@Override

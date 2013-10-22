@@ -49,15 +49,14 @@ public class SocketSender {
 	 * @throws JSchException 
 	 */
 	public void send(IMessage message) throws IOException, JSchException{
-		/*
 		Socket s = new Socket(receiver, port);
 		System.out.println("DEBUG: SOCKET: ESTABLISHED CONNECTION");
 		ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
 		oos.writeObject(message);
 		oos.close();
-		s.close();*/
+		s.close();
 		
-		JSch jsch = new JSch();
+		/*JSch jsch = new JSch();
 		Session session=jsch.getSession("in439204", receiver.getHostAddress(), 22);
 
 		session.setPassword("Pkk6gE5g");
@@ -78,7 +77,7 @@ public class SocketSender {
 		
 		oos.close();
 		is.close();
-		channel.disconnect();
+		channel.disconnect();*/
 	}
 
 }
