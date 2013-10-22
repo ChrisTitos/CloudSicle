@@ -8,6 +8,8 @@ import java.util.List;
 import org.cloudsicle.communication.SocketSender;
 import org.cloudsicle.messages.JobMetaData;
 
+import com.jcraft.jsch.JSchException;
+
 public class Session {
 	
 	/**
@@ -46,6 +48,9 @@ public class Session {
 			sender.send(request);
 			return true;
 		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		} catch (JSchException e) {
 			e.printStackTrace();
 			return false;
 		}

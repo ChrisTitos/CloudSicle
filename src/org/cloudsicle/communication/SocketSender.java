@@ -1,11 +1,17 @@
 package org.cloudsicle.communication;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
 import org.cloudsicle.messages.IMessage;
+
+import com.jcraft.jsch.*;
 
 /**
  * Class to facilitate the sending of objects to a specific target
@@ -40,14 +46,76 @@ public class SocketSender {
 	 * 
 	 * @param message The message to be sent
 	 * @throws IOException If something went wrong sending
+	 * @throws JSchException 
 	 */
-	public void send(IMessage message) throws IOException{
+	public void send(IMessage message) throws IOException, JSchException{
+		/*
 		Socket s = new Socket(receiver, port);
 		System.out.println("DEBUG: SOCKET: ESTABLISHED CONNECTION");
 		ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
 		oos.writeObject(message);
 		oos.close();
-		s.close();
+		s.close();*/
+		
+		JSch jsch = new JSch();
+		Session session=jsch.getSession("in439204", receiver.getHostAddress(), 22);
+		
+		UserInfo ui=new UserInfo(){
+
+			@Override
+			public String getPassphrase() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public String getPassword() {
+				return "Pkk6gE5g";
+			}
+
+			@Override
+			public boolean promptPassphrase(String arg0) {
+				// TODO Auto-generated method stub
+				return false;
+			}
+
+			@Override
+			public boolean promptPassword(String arg0) {
+				// TODO Auto-generated method stub
+				return false;
+			}
+
+			@Override
+			public boolean promptYesNo(String arg0) {
+				// TODO Auto-generated method stub
+				return false;
+			}
+
+			@Override
+			public void showMessage(String arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		};
+		session.setUserInfo(ui);
+		session.connect();
+		
+		PipedInputStream pis = new PipedInputStream();
+		PipedOutputStream pos = new PipedOutputStream(pis);
+		ObjectOutputStream oos = new ObjectOutputStream(pos);
+		ObjectInputStream is = new ObjectInputStream(pis);
+		
+		Channel channel = session.getStreamForwarder(receiver.getHostAddress(), port);
+		channel.setInputStream(is);
+		channel.setOutputStream(System.out);
+		channel.connect(1000);
+		
+		oos.writeObject(message);
+		
+		oos.close();
+		is.close();
+		channel.disconnect();
 	}
 
 }
