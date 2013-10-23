@@ -22,7 +22,7 @@ public class Activity implements IMessage, INeedOwnIP {
 	public ArrayList<IJob> getJobs(){
 		return jobs;
 	}
-
+	
 	@Override
 	public void setIP(InetAddress ip) {
 		this.senderIp = ip;

@@ -1,7 +1,7 @@
 package org.cloudsicle.master;
 
 import java.io.IOException;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.ArrayDeque;
 
 import org.cloudsicle.communication.SocketSender;
 import org.cloudsicle.master.slaves.ResourcePool;
@@ -15,7 +15,7 @@ import com.jcraft.jsch.JSchException;
 public class Scheduler implements Runnable {
 	
 	private ResourcePool pool;
-	private PriorityBlockingQueue<JobMetaData> metaJobQueue;
+	private ArrayDeque<JobMetaData> metaJobQueue;
 	
 	/**
 	 * Instantiate a new Scheduler.
@@ -23,7 +23,7 @@ public class Scheduler implements Runnable {
 	 */
 	public Scheduler() throws ClientConfigurationException{
 		this.pool = new ResourcePool();
-		this.metaJobQueue = new PriorityBlockingQueue<JobMetaData>();
+		this.metaJobQueue = new ArrayDeque<JobMetaData>();
 		
 		new Thread(this).start();
 	}
@@ -33,7 +33,7 @@ public class Scheduler implements Runnable {
 	 * @param metajob
 	 */
 	public void schedule(JobMetaData metajob){
-		this.metaJobQueue.put(metajob);
+		this.metaJobQueue.push(metajob);
 	}
 
 	@Override
@@ -49,10 +49,10 @@ public class Scheduler implements Runnable {
 		while(true){
 			if(!this.metaJobQueue.isEmpty()){
 				
-				JobMetaData metajob = this.metaJobQueue.poll();
+				JobMetaData metajob = this.metaJobQueue.pop();
 				SlaveVM vm = this.pool.requestVM();
 				if(vm != null){
-					SocketSender sender = new SocketSender(false, metajob.getIP(), 1);
+					SocketSender sender = new SocketSender(false, metajob.getIP());
 					Allocation alloc = new Allocation();
 					alloc.allocate(vm, metajob.getFiles()); //for now just give everything to one vm
 					
