@@ -19,6 +19,7 @@ import org.cloudsicle.messages.IMessage;
 import org.cloudsicle.messages.SoftExit;
 import org.cloudsicle.messages.StatusUpdate;
 import org.cloudsicle.slave.JobExecutor;
+import org.cloudsicle.slave.UnknownJobException;
 
 import com.jcraft.jsch.JSchException;
 
@@ -164,7 +165,11 @@ public class Slave implements IMessageHandler{
 		
 		public void executeJob(IJob job){
 			JobExecutor executor = new JobExecutor(job);
-			executor.run();
+			try {
+				executor.run();
+			} catch (UnknownJobException e) {
+				e.printStackTrace();
+			}
 		}
 		
 	}
