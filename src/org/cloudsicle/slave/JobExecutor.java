@@ -1,7 +1,9 @@
 package org.cloudsicle.slave;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.cloudsicle.main.jobs.CombineJob;
@@ -67,8 +69,28 @@ public class JobExecutor {
 		}
 	}
 	
-	private void executeCombineJob(CombineJob job){
-		// TODO
+	/**
+	 * Combine the files specified by fileids in a combinejob.
+	 * The output is to be found at the unique InetAddress folder of the
+	 * client as "output.gif"
+	 * 
+	 * @param job The combine job
+	 * @throws IOException If creating the output or reading the input failed
+	 */
+	private void executeCombineJob(CombineJob job) throws IOException{
+		GifsicleRunner program = new GifsicleRunner();
+		program.setDelay(1);
+		program.setLoops(true);
+		File output = new File(job.conjureOutputFile());
+		ArrayList<File> files = new ArrayList<File>();
+		for (int fileid : job.getFiles()){
+			File f;
+			synchronized (fileSystem){
+				f = new File(fileSystem.get(job.getIP()).get(fileid));
+			}
+			files.add(f);
+		}
+		program.convert(files, output);
 	}
 	
 	private void executeCompressJob(CompressJob job){
