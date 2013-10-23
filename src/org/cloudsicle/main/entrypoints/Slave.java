@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.cloudsicle.communication.IMessageHandler;
+import org.cloudsicle.communication.INeedOwnIP;
 import org.cloudsicle.communication.SocketListener;
 import org.cloudsicle.communication.SocketSender;
 import org.cloudsicle.main.VMState;
@@ -72,10 +73,13 @@ public class Slave implements IMessageHandler{
 					}
 				}
 				
-				for (IJob job : jobs)
+				for (IJob job : jobs){
+					if (job instanceof INeedOwnIP)
+						((INeedOwnIP)job).setIP(((Activity) message).getIP());
 					synchronized (jobQueue){
 						jobQueue.add(job);
 					}
+				}
 
 				sender.send(status);
 			} catch (IOException e) {
