@@ -111,6 +111,7 @@ public class Slave implements IMessageHandler{
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
+		@SuppressWarnings("unused")
 		Slave slave = new Slave();
 	}
 
@@ -172,6 +173,8 @@ public class Slave implements IMessageHandler{
 			try {
 				executor.run();
 			} catch (UnknownJobException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
