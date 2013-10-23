@@ -13,59 +13,69 @@ import org.opennebula.client.ClientConfigurationException;
 import com.jcraft.jsch.JSchException;
 
 public class Scheduler implements Runnable {
-	
+
 	private ResourcePool pool;
 	private ArrayDeque<JobMetaData> metaJobQueue;
-	
+
 	/**
 	 * Instantiate a new Scheduler.
+	 * 
 	 * @throws ClientConfigurationException
 	 */
-	public Scheduler() throws ClientConfigurationException{
+	public Scheduler() throws ClientConfigurationException {
 		this.pool = new ResourcePool();
 		this.metaJobQueue = new ArrayDeque<JobMetaData>();
-		
+
 		new Thread(this).start();
 	}
-	
+
 	/**
 	 * Add JobMetaData that has to be scheduled.
+	 * 
 	 * @param metajob
 	 */
-	public void schedule(JobMetaData metajob){
+	public void schedule(JobMetaData metajob) {
 		this.metaJobQueue.push(metajob);
 	}
 
 	@Override
-	public void run(){
+	public void run() {
 		/**
-		 * Scheduling (first veeery rough version):
-		 * - find VM that is not in use
-		 * 	 |-> if none available, add new VM to pool and use that one
-		 * 		|-> if pool full, wait (FCFS)
-		 * - set the VM status to unavailable
-		 * - send the VM ID/IP to the client 
+		 * Scheduling (first veeery rough version): - find VM that is not in use
+		 * |-> if none available, add new VM to pool and use that one |-> if
+		 * pool full, wait (FCFS) - set the VM status to unavailable - send the
+		 * VM ID/IP to the client
 		 */
-		while(true){
-			if(!this.metaJobQueue.isEmpty()){
-				
-				JobMetaData metajob = this.metaJobQueue.pop();
-				SlaveVM vm = this.pool.requestVM();
-				if(vm != null){
-					SocketSender sender = new SocketSender(false, metajob.getIP());
-					Allocation alloc = new Allocation();
-					alloc.allocate(vm, metajob.getFiles()); //for now just give everything to one vm
-					
-					try {
-						sender.send(alloc);
-					} catch (IOException e) {
-						e.printStackTrace();
-					} catch (JSchException e) {
-						e.printStackTrace();
+		while (true) {
+			synchronized (this.metaJobQueue) {
+				if (!this.metaJobQueue.isEmpty()) {
+					JobMetaData metajob = this.metaJobQueue.pop();
+					System.out.println("DEBUG: Sheduling job of "
+							+ metajob.getIP());
+
+					SlaveVM vm = this.pool.requestVM();
+					if (vm != null) {
+						SocketSender sender = new SocketSender(false,
+								metajob.getIP());
+						Allocation alloc = new Allocation();
+						alloc.allocate(vm, metajob.getFiles()); // for now just
+																// give
+																// everything to
+																// one vm
+
+						try {
+							System.out.println("DEBUG: Sending job to "
+									+ metajob.getIP());
+							sender.send(alloc);
+						} catch (IOException e) {
+							e.printStackTrace();
+						} catch (JSchException e) {
+							e.printStackTrace();
+						}
+
 					}
-					
 				}
 			}
-		}		
+		}
 	}
 }

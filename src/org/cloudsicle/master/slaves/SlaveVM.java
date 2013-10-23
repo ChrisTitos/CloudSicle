@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.opennebula.client.Client;
 import org.opennebula.client.OneResponse;
@@ -74,13 +76,16 @@ public class SlaveVM {
 		if (rc.isError())
 			throw new UninstantiableException();
 		
-		Scanner sc = new Scanner(rc.getMessage());
-		while (!"IP=\"".equals(sc.findInLine("IP=\"")))
-			sc.nextLine();
-		String ip = sc.nextLine();
+		Pattern p = Pattern.compile("<DNS><!\\[CDATA\\[*([^\"]*)\\]\\]></DNS>");
+		Matcher m = p.matcher(rc.getMessage());
+		String ip = "";
+		if (m.find()) {
+		    ip = m.group(1);
+		}
+		System.out.println("DEBUG: Created VM with IP " + ip);
 		
 		try {
-			this.ip = InetAddress.getByName(ip.substring(0, ip.indexOf('"')));
+			this.ip = InetAddress.getByName(ip);
 		} catch (UnknownHostException e) {
 			throw new UninstantiableException();
 		}

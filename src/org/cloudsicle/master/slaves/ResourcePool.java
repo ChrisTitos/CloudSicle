@@ -24,6 +24,7 @@ public class ResourcePool {
 	public ResourcePool() throws ClientConfigurationException{
 		this.openNebula = new Client();
 		this.maxVMs = 20;
+		addVM(); //create an initial VM
 	}
 	
 	/**
@@ -45,7 +46,6 @@ public class ResourcePool {
 	 */
 	private SlaveVM addVM() throws UninstantiableException{
 		SlaveVM slave = new SlaveVM(openNebula);
-		vmsInUse.add(slave);
 		slave.initialize();
 		return slave;
 	}
@@ -78,7 +78,9 @@ public class ResourcePool {
 			return vm;
 		}
 		try{
-			return addVM();
+			SlaveVM vm = addVM();
+			vmsInUse.add(vm);
+			return vm;
 		} catch (UninstantiableException e){
 			return null;
 		}

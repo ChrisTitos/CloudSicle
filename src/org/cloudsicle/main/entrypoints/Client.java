@@ -1,6 +1,5 @@
 package org.cloudsicle.main.entrypoints;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ public class Client implements IMessageHandler {
 		}
 		Session s = new Session();
 		Frontend.launch(s);
-
+		
 	}
 
 	public Client() throws IOException {
