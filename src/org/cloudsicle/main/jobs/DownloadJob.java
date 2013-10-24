@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 
 import org.cloudsicle.communication.INeedOwnIP;
+import org.cloudsicle.slave.FileLocations;
 
 public class DownloadJob implements IJob, INeedOwnIP {
 	
@@ -49,8 +50,7 @@ public class DownloadJob implements IJob, INeedOwnIP {
 	}
 	
 	private String conjureFilePath() throws IOException{
-		String out = ip.getHostAddress();
-		out = "downloads" + File.separator + out.replaceAll("[.:]", "") + File.separator + fileid + ".gif";
+		String out = FileLocations.pathForFileid(ip, fileid);
 		File f = new File(out);
 		f.createNewFile();
 		return out;
@@ -65,6 +65,7 @@ public class DownloadJob implements IJob, INeedOwnIP {
 	public String download() throws IOException{
 		String path = conjureFilePath();
 		FileOutputStream fos = new FileOutputStream(path);
+		@SuppressWarnings("resource")
 		Socket sock = new Socket(ip,port);
 		InputStream is = sock.getInputStream();
 		int c;

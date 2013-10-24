@@ -1,6 +1,8 @@
 package org.cloudsicle.slave;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -13,6 +15,8 @@ import org.cloudsicle.main.jobs.ForwardJob;
 import org.cloudsicle.main.jobs.IJob;
 import org.cloudsicle.main.jobs.PresentJob;
 import org.cloudsicle.main.jobs.ProduceJob;
+import org.kamranzafar.jtar.TarEntry;
+import org.kamranzafar.jtar.TarOutputStream;
 
 public class JobExecutor {
 
@@ -93,8 +97,29 @@ public class JobExecutor {
 		program.convert(files, output);
 	}
 	
-	private void executeCompressJob(CompressJob job){
-		// TODO
+	/**
+	 * Compress the output file of a previous combine job
+	 * 
+	 * @param job
+	 * @throws IOException
+	 */
+	private void executeCompressJob(CompressJob job) throws IOException{
+		File output = new File(job.conjureOutputFile());
+		File input = new File(FileLocations.pathForOutput(job.getIP(), job.getFileName()));
+		FileOutputStream fos = new FileOutputStream(output);
+		TarOutputStream tos = new TarOutputStream(fos);
+		tos.putNextEntry(new TarEntry(input, input.getName()));
+	    FileInputStream fis = new FileInputStream(input);
+
+		int data = 0;
+		
+		while((data = fis.read()) != -1) {
+			tos.write(data);
+		}
+		
+		tos.flush();
+		fis.close();
+	    tos.close();
 	}
 	
 	/**
