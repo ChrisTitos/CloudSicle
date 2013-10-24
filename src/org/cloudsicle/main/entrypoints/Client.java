@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import org.cloudsicle.client.Session;
 import org.cloudsicle.client.gui.Frontend;
+import org.cloudsicle.communication.DefaultNetworkVariables;
 import org.cloudsicle.communication.IMessageHandler;
 import org.cloudsicle.communication.SocketListener;
 import org.cloudsicle.communication.SocketSender;

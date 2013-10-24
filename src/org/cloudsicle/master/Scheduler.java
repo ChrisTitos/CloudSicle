@@ -3,6 +3,7 @@ package org.cloudsicle.master;
 import java.io.IOException;
 import java.util.ArrayDeque;
 
+import org.cloudsicle.communication.DefaultNetworkVariables;
 import org.cloudsicle.communication.SocketSender;
 import org.cloudsicle.master.slaves.ResourcePool;
 import org.cloudsicle.master.slaves.SlaveVM;
