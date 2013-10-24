@@ -21,21 +21,20 @@ public class SingleDownload {
 
 	private final File file;
 	private final String descriptor;
-	private final int timeout;
 	
-	private SingleDownload(String file, String descriptor, int timeout){
+	private SingleDownload(String file, String descriptor){
 		this.file = new File(file);
 		this.descriptor = descriptor;
-		this.timeout = timeout;
 	}
 	
 	/**
 	 * Block until our file is downloaded
 	 * 
+	 * @param timeout The timeout in milliseconds to wait for the file to start downloading
 	 * @return True if the file was transferred, False if a timeout occurred
 	 * @throws IOException 
 	 */
-	public synchronized boolean offer(){
+	public synchronized boolean offer(int timeout){
 		try{
 			long startTime = System.currentTimeMillis();
 			while (System.currentTimeMillis() < startTime + timeout){
