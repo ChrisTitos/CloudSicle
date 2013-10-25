@@ -32,7 +32,6 @@ public class Client implements IMessageHandler {
 		try {
 			Client client = new Client();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		Session s = new Session();

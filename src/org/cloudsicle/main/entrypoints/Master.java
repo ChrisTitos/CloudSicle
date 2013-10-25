@@ -2,6 +2,7 @@ package org.cloudsicle.main.entrypoints;
 
 import org.cloudsicle.communication.IMessageHandler;
 import org.cloudsicle.communication.SocketListener;
+import org.cloudsicle.master.Monitor;
 import org.cloudsicle.master.Scheduler;
 import org.cloudsicle.messages.IMessage;
 import org.cloudsicle.messages.JobMetaData;
@@ -11,19 +12,22 @@ public class Master implements IMessageHandler {
 
 	private Scheduler scheduler;
 	private SocketListener listener;
-	
+	private Monitor monitor;
+
 	public Master() throws Exception {
-		this.scheduler = new Scheduler();
+		this.monitor = new Monitor();
+		this.scheduler = new Scheduler(this.monitor);
 		this.listener = new SocketListener(this);
 		listener.start();
 	}
-	
+
 	@Override
-	public void process(IMessage message) {		
-		if(message instanceof JobMetaData){
+	public void process(IMessage message) {
+		if (message instanceof JobMetaData) {
 			System.out.println("DEBUG: Received message!");
+			this.monitor.addjobWaiting((JobMetaData) message);
 			this.scheduler.schedule((JobMetaData) message);
-		} else if(message instanceof StatusUpdate){
+		} else if (message instanceof StatusUpdate) {
 			System.out.println(((StatusUpdate) message).getMessage());
 		}
 	}
@@ -34,7 +38,7 @@ public class Master implements IMessageHandler {
 	public static void main(String[] args) {
 		try {
 			Master master = new Master();
-					} catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

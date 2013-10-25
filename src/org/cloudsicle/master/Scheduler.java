@@ -17,16 +17,18 @@ public class Scheduler implements Runnable {
 
 	private ResourcePool pool;
 	private ArrayDeque<JobMetaData> metaJobQueue;
+	private Monitor monitor;
 
 	/**
 	 * Instantiate a new Scheduler.
+	 * @param monitor 
 	 * 
 	 * @throws ClientConfigurationException
 	 */
-	public Scheduler() throws ClientConfigurationException {
+	public Scheduler(Monitor monitor) throws ClientConfigurationException {
 		this.pool = new ResourcePool();
 		this.metaJobQueue = new ArrayDeque<JobMetaData>();
-
+		this.monitor = monitor;
 		new Thread(this).start();
 	}
 
@@ -68,6 +70,8 @@ public class Scheduler implements Runnable {
 							System.out.println("DEBUG: Sending job to "
 									+ metajob.getIP());
 							sender.send(alloc);
+							monitor.removejobWaiting(metajob);
+							monitor.addjobRunning(metajob);
 						} catch (IOException e) {
 							e.printStackTrace();
 						} catch (JSchException e) {

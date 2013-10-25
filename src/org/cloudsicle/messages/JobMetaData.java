@@ -14,8 +14,13 @@ public class JobMetaData implements IMessage, INeedOwnIP {
 	private static final long serialVersionUID = 4966126383441403840L;
 	
 	private InetAddress client;
+
 	private int totalFileSize;
 	private List<String> files;
+	
+	private long starttime;
+	private long endtime;
+	
 
 	public int getTotalFileSize() {
 		return totalFileSize;
@@ -49,6 +54,22 @@ public class JobMetaData implements IMessage, INeedOwnIP {
 	@Override
 	public InetAddress getIP() {
 		return this.client;
+	}
+
+	public long getStarttime() {
+		return starttime;
+	}
+
+	public void setStarttime(long starttime) {
+		this.starttime = starttime;
+	}
+
+	public long getEndtime() {
+		return endtime;
+	}
+
+	public void setEndtime(long endtime) {
+		this.endtime = endtime;
 	}
 
 
