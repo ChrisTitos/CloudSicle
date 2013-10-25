@@ -3,6 +3,7 @@ package org.cloudsicle.client;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.HashMap;
 import java.util.List;
 
 import org.cloudsicle.communication.SocketSender;
@@ -11,6 +12,16 @@ import org.cloudsicle.messages.JobMetaData;
 import com.jcraft.jsch.JSchException;
 
 public class Session {
+	
+	private HashMap<Integer, String> files;
+	
+	public Session(){
+		this.files = new HashMap<Integer, String>();
+	}
+	
+	public HashMap<Integer, String> getFileList(){
+		return this.files;
+	}
 	
 	/**
 	 * Get the total file size for a list of string describing files
@@ -38,6 +49,10 @@ public class Session {
 	 * @return 
 	 */
 	public boolean requestCloudSicle(List<String> files, InetAddress server){
+		for(String filename : files){
+			this.files.put(filename.hashCode(), filename);
+		}
+		
 		JobMetaData request = new JobMetaData();
 		
 		request.setFiles(files);
