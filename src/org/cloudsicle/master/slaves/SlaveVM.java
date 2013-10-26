@@ -1,12 +1,12 @@
 package org.cloudsicle.master.slaves;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.cloudsicle.communication.SocketSender;
 import org.opennebula.client.Client;
 import org.opennebula.client.OneResponse;
 import org.opennebula.client.vm.VirtualMachine;
@@ -48,7 +48,7 @@ public class SlaveVM {
 	}
 	
 	public boolean isRunning(){		
-		return vm.lcmStateStr() == "RUNNING";
+		return vm.lcmStateStr().equals("RUNNING");
 	}
 	
 	/**
@@ -62,7 +62,7 @@ public class SlaveVM {
 		if (rc.isError())
 			throw new UninstantiableException();
 		
-		Pattern p = Pattern.compile("<DNS><!\\[CDATA\\[*([^\"]*)\\]\\]></DNS>");
+		Pattern p = Pattern.compile("<IP_PUBLIC><!\\[CDATA\\[*([^\"]*)\\]\\]></IP_PUBLIC>");
 		Matcher m = p.matcher(rc.getMessage());
 		String ip = "";
 		if (m.find()) {
@@ -128,10 +128,10 @@ public class SlaveVM {
 	private String buildCommand(){
 		return "ssh root@"
 				+ ip
-				+ " \"cat > slave.jar\" < slave.jar"
-				+ ";ssh root@"
-				+ ip
-				+" \"java -jar slave.jar\"";
+				+ " \"cat > slave.jar\" < slave.jar";
+				//+ ";ssh root@"
+				//+ ip
+				//+" \"java -jar slave.jar\"";
 	}
 	
 	/**
@@ -140,12 +140,24 @@ public class SlaveVM {
 	 * @return Whether we succeeded in starting the remote jar
 	 */
 	public boolean initialize(){
-		try {
+		System.out.println("DEBUG: Moving slave.jar to VM " + ip);
+		SocketSender sender = new SocketSender(false, ip);
+		sender.sendFile("slave.jar");
+		return true;
+		/*try {
+			
 			Process p = Runtime.getRuntime().exec(buildCommand());
+			int result = p.waitFor();
+			System.out.println("Succes? " + result);
+			
 			return true;
 		} catch (IOException e){
+			e.printStackTrace();
 			return false;
-		}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return false;
+		}*/
 	}
 	
 }

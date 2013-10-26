@@ -137,7 +137,7 @@ public class JobExecutor {
 	 * @param job The download job to execute
 	 * @throws IOException If the file could not be downloaded
 	 */
-	private void executeDownloadJob(DownloadJob job) throws IOException{
+	private void executeDownloadJob(DownloadJob job) throws IOException, JSchException{
 		String file = job.download();
 		synchronized (fileSystem){
 			if (!fileSystem.containsKey(job.getIP())){
@@ -146,6 +146,7 @@ public class JobExecutor {
 			ConcurrentHashMap<Integer, String> fileMapping = fileSystem.get(job.getIP());
 			fileMapping.put(job.getFileID(), file);
 		}
+		updateable.send(new StatusUpdate("VM Executing DownloadJob", VMState.EXECUTING));
 	}
 	
 	private void executeForwardJob(ForwardJob job) throws IOException, JSchException{

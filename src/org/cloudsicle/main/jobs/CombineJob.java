@@ -2,13 +2,15 @@ package org.cloudsicle.main.jobs;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.InetAddress;
 
 import org.cloudsicle.communication.INeedOwnIP;
 import org.cloudsicle.slave.FileLocations;
 
-public class CombineJob implements IJob, INeedOwnIP {
-	
+public class CombineJob implements IJob, INeedOwnIP, Serializable {
+
+	private static final long serialVersionUID = -855918850745018227L;
 	private final int[] files;
 	private final String name;
 	private InetAddress ip;

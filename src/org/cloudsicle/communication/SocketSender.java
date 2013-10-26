@@ -7,6 +7,8 @@ import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.taskdefs.optional.ssh.Scp;
 import org.cloudsicle.messages.IMessage;
 
 import com.jcraft.jsch.Channel;
@@ -50,13 +52,22 @@ public class SocketSender {
 	 * @param message The message to be sent
 	 * @throws IOException If something went wrong sending
 	 */
-	public void send(IMessage message) throws IOException, JSchException{
+	public void send(IMessage message, boolean toVM) throws IOException, JSchException{
 		message.setSender();
 		if (useSSH)
-			sendSSH(message);
+			sendSSH(message, toVM);
 		else
 			sendSock(message);
 	}
+	
+	public void send(IMessage message) throws IOException, JSchException{
+		message.setSender();
+		if (useSSH)
+			sendSSH(message, false);
+		else
+			sendSock(message);
+	}
+	
 	
 	/**
 	 * Send a message to our target.
@@ -65,11 +76,16 @@ public class SocketSender {
 	 * @throws IOException If something went wrong sending
 	 * @throws JSchException 
 	 */
-	public void sendSSH(IMessage message) throws IOException, JSchException{
+	public void sendSSH(IMessage message, boolean toVM) throws IOException, JSchException{
 		JSch jsch = new JSch();
-		Session session=jsch.getSession("in439204", receiver.getHostAddress(), 22);
-
-		session.setPassword("Pkk6gE5g");
+		Session session;
+		if(toVM){
+			 session = jsch.getSession("root", receiver.getHostAddress(), 22);
+		} else{	
+			session =jsch.getSession("in439204", receiver.getHostAddress(), 22);
+			session.setPassword("Pkk6gE5g");
+		}
+	
 		session.setConfig("StrictHostKeyChecking", "no");
 		session.connect();
 		
@@ -108,6 +124,18 @@ public class SocketSender {
 		oos.writeObject(message);
 		oos.close();
 		s.close();
+	}
+	
+	public void sendFile(String localfile){
+		Scp scp = new Scp();
+		scp.setRemoteTofile("root@" + receiver.getHostAddress() + ":" + localfile);
+		scp.setLocalFile(localfile);
+		scp.setProject(new Project()); // prevent a NPE (Ant works with projects)
+        scp.setTrust(true);
+        scp.setPassword("");
+        System.out.println("root@" + receiver.getHostAddress() + ":" + localfile);
+        
+        scp.execute();
 	}
 
 }

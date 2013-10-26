@@ -1,5 +1,9 @@
 package org.cloudsicle.main.jobs;
 
-public class ForwardJob implements IJob {
+import java.io.Serializable;
+
+public class ForwardJob implements IJob, Serializable {
+
+	private static final long serialVersionUID = 7668738592907238533L;
 
 }

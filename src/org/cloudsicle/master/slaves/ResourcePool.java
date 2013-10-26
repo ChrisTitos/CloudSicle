@@ -41,8 +41,8 @@ public class ResourcePool {
 	}
 
 	/**
-	 * Adds a virtual machine to our pool.
-	 * It creates a thread that will wait untill the VM is ready.
+	 * Adds a virtual machine to our pool. It creates a thread that will wait
+	 * untill the VM is ready.
 	 * 
 	 * @throws UninstantiableException
 	 *             If something went wrong creating the vm
@@ -52,7 +52,9 @@ public class ResourcePool {
 		slave.createVM();
 		Thread creator = new Thread() {
 			public void run() {
-				while (!slave.isRunning()) {}
+				while (!slave.getVm().lcmStateStr().equals("RUNNING")) {slave.getVm().info();}
+				System.out.println(slave.getVm().stateStr());
+
 				if (slave.initialize()) {
 					vmsAvailable.add(slave);
 				}
@@ -80,7 +82,8 @@ public class ResourcePool {
 	/**
 	 * Request a new VM for use.
 	 * 
-	 * @return A Slave VM to work on, or null if we have to wait for a VM to start up
+	 * @return A Slave VM to work on, or null if we have to wait for a VM to
+	 *         start up
 	 */
 	public SlaveVM requestVM() {
 		if (vmsInUse.size() >= maxVMs)

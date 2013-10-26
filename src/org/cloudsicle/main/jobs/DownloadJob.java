@@ -4,13 +4,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.Socket;
 
 import org.cloudsicle.communication.INeedOwnIP;
 import org.cloudsicle.slave.FileLocations;
 
-public class DownloadJob implements IJob, INeedOwnIP {
+public class DownloadJob implements IJob, Serializable, INeedOwnIP {
+	
+	private static final long serialVersionUID = -8173332718020415882L;
 	
 	//Transferred by sender
 	private final int port;		//The port the client has open for the file request

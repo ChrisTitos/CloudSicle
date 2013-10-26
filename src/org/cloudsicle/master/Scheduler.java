@@ -91,7 +91,7 @@ public class Scheduler implements Runnable {
 		HashMap<InetAddress, List<String>> allocs = alloc.getAllocations();
 
 		for (InetAddress vm : allocs.keySet()) {
-			SocketSender sender = new SocketSender(false, vm);
+			SocketSender sender = new SocketSender(true, vm);
 
 			ArrayList<String> files = (ArrayList<String>) allocs.get(vm);
 			int[] filelist = new int[files.size()];
@@ -114,7 +114,7 @@ public class Scheduler implements Runnable {
 			try {
 				System.out.println("Sending Activity to "
 						+ vm.getHostAddress());
-				sender.send(activity);
+				sender.send(activity, true);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (JSchException e) {
