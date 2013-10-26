@@ -28,10 +28,7 @@ public class SocketListener extends Thread {
 		while (true) {
 			try {
 				Socket s = serverSocket.accept();
-				//System.out.println("DEBUG: SERVERSOCKET: ACCEPTED CONNECTION from " + s.getRemoteSocketAddress());
-				System.out.println("Connected from " + s.getInetAddress() + " on port "
-			             + s.getPort() + " to port " + s.getLocalPort() + " of "
-			             + s.getLocalAddress() + " remote socket: " + s.getRemoteSocketAddress());
+				System.out.println("DEBUG: SERVERSOCKET: ACCEPTED CONNECTION");
 				Thread t = new Thread(new SocketThread(s, this.mHandler));
 				t.start();
 			} catch (SocketTimeoutException s) {

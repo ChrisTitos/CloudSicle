@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.cloudsicle.master.slaves.SlaveVM;
 
-public class Allocation implements IMessage {
+public class Allocation extends AbstractMessage {
 
 	private static final long serialVersionUID = 8123268038063650981L;
 	

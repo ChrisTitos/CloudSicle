@@ -60,9 +60,9 @@ public class SlaveVM {
 	private void setUpVm(Client client) throws UninstantiableException{
 		vm = new VirtualMachine(id, client);
 		
-		OneResponse rc = vm.hold();
+		/*OneResponse rc = vm.hold();
 		if (rc.isError())
-			throw new UninstantiableException();
+			throw new UninstantiableException();*/
 	}
 	
 	/**

@@ -2,6 +2,7 @@ package org.cloudsicle.main.entrypoints;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +18,6 @@ import org.cloudsicle.main.jobs.CompressJob;
 import org.cloudsicle.main.jobs.DownloadJob;
 import org.cloudsicle.main.jobs.ForwardJob;
 import org.cloudsicle.main.jobs.IJob;
-import org.cloudsicle.main.jobs.ProduceJob;
 import org.cloudsicle.messages.Activity;
 import org.cloudsicle.messages.Allocation;
 import org.cloudsicle.messages.IMessage;
@@ -28,14 +28,14 @@ public class Client implements IMessageHandler {
 
 	private SocketListener listener;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws UnknownHostException {
 		try {
 			Client client = new Client();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		Session s = new Session();
-		Frontend.launch(s);
+		Frontend.launch(s); 
 
 	}
 
@@ -78,6 +78,7 @@ public class Client implements IMessageHandler {
 			list.add(f);
 			
 			Activity activity = new Activity(list);
+			activity.setSender();
 
 			try {
 				System.out.println("Sending Activity to "

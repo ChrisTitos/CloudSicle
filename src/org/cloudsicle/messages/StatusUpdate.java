@@ -2,7 +2,7 @@ package org.cloudsicle.messages;
 
 import org.cloudsicle.main.VMState;
 
-public class StatusUpdate implements IMessage {
+public class StatusUpdate extends AbstractMessage {
 
 
 	private static final long serialVersionUID = -7130640575707394426L;

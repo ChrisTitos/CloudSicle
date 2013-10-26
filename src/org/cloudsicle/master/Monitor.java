@@ -12,10 +12,10 @@ public class Monitor {
 	private ArrayList<JobMetaData> failedJobs;
 
 	public Monitor() {
-		ArrayList<JobMetaData> waitingJobs = new ArrayList<JobMetaData>();
-		ArrayList<JobMetaData> runningJobs = new ArrayList<JobMetaData>();
-		ArrayList<JobMetaData> finishedJobs = new ArrayList<JobMetaData>();
-		ArrayList<JobMetaData> failedJobs = new ArrayList<JobMetaData>();
+		waitingJobs = new ArrayList<JobMetaData>();
+		runningJobs = new ArrayList<JobMetaData>();
+		finishedJobs = new ArrayList<JobMetaData>();
+		failedJobs = new ArrayList<JobMetaData>();
 
 	}
 

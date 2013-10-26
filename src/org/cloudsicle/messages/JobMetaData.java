@@ -9,7 +9,7 @@ import org.cloudsicle.communication.INeedOwnIP;
  * The JobMetaData is presented to the master by the client so that the master can allocate
  * VM(s) for the actual job
  */
-public class JobMetaData implements IMessage, INeedOwnIP {
+public class JobMetaData extends AbstractMessage implements INeedOwnIP {
 
 	private static final long serialVersionUID = 4966126383441403840L;
 	

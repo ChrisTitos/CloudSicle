@@ -59,12 +59,13 @@ public class Scheduler implements Runnable {
 					SlaveVM vm = this.pool.requestVM();
 					if (vm != null) {
 						SocketSender sender = new SocketSender(false,
-								metajob.getIP());
+								metajob.getSender());
 						Allocation alloc = new Allocation();
 						alloc.allocate(vm, metajob.getFiles()); // for now just
 																// give
 																// everything to
 																// one vm
+						alloc.setSender();
 
 						try {
 							System.out.println("DEBUG: Sending job to "
