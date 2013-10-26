@@ -28,7 +28,7 @@ public class Master implements IMessageHandler {
 			this.monitor.addjobWaiting((JobMetaData) message);
 			this.scheduler.schedule((JobMetaData) message);
 		} else if (message instanceof StatusUpdate) {
-			//((StatusUpdate)message).getSender()
+			((StatusUpdate)message).getSender();
 			System.out.println(((StatusUpdate) message).getMessage());
 		}
 	}

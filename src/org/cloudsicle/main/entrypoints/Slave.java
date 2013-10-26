@@ -169,12 +169,14 @@ public class Slave implements IMessageHandler{
 		}
 		
 		public void executeJob(IJob job){
-			JobExecutor executor = new JobExecutor(job);
+			JobExecutor executor = new JobExecutor(job, updateable);
 			try {
 				executor.run();
 			} catch (UnknownJobException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (JSchException e) {
 				e.printStackTrace();
 			}
 		}

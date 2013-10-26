@@ -1,12 +1,22 @@
 package org.cloudsicle.master;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import org.cloudsicle.communication.DefaultNetworkVariables;
 import org.cloudsicle.communication.SocketSender;
+import org.cloudsicle.main.jobs.CombineJob;
+import org.cloudsicle.main.jobs.CompressJob;
+import org.cloudsicle.main.jobs.DownloadJob;
+import org.cloudsicle.main.jobs.ForwardJob;
+import org.cloudsicle.main.jobs.IJob;
 import org.cloudsicle.master.slaves.ResourcePool;
 import org.cloudsicle.master.slaves.SlaveVM;
+import org.cloudsicle.messages.Activity;
 import org.cloudsicle.messages.Allocation;
 import org.cloudsicle.messages.JobMetaData;
 import org.opennebula.client.ClientConfigurationException;
@@ -40,6 +50,10 @@ public class Scheduler implements Runnable {
 	public void schedule(JobMetaData metajob) {
 		this.metaJobQueue.push(metajob);
 	}
+	
+	public void vmFinished(SlaveVM vm){
+		pool.releaseVM(vm);
+	}
 
 	@Override
 	public void run() {
@@ -58,29 +72,53 @@ public class Scheduler implements Runnable {
 
 					SlaveVM vm = this.pool.requestVM();
 					if (vm != null) {
-						SocketSender sender = new SocketSender(false,
-								metajob.getSender());
 						Allocation alloc = new Allocation();
 						alloc.allocate(vm, metajob.getFiles()); // for now just
 																// give
 																// everything to
 																// one vm
-						alloc.setSender();
-
-						try {
-							System.out.println("DEBUG: Sending job to "
-									+ metajob.getIP());
-							sender.send(alloc);
-							monitor.removejobWaiting(metajob);
-							monitor.addjobRunning(metajob);
-						} catch (IOException e) {
-							e.printStackTrace();
-						} catch (JSchException e) {
-							e.printStackTrace();
-						}
+						createActivity(alloc, metajob.getIP());
 
 					}
 				}
+			}
+		}
+	}
+	
+	private void createActivity(Allocation alloc, InetAddress client) {
+
+		ArrayList<IJob> list = new ArrayList<IJob>();
+		HashMap<InetAddress, List<String>> allocs = alloc.getAllocations();
+
+		for (InetAddress vm : allocs.keySet()) {
+			SocketSender sender = new SocketSender(false, vm);
+
+			ArrayList<String> files = (ArrayList<String>) allocs.get(vm);
+			int[] filelist = new int[files.size()];
+			for (String filename : files) {
+				DownloadJob d = new DownloadJob(
+						DefaultNetworkVariables.DEFAULT_FTP_PORT,
+						filename.hashCode());
+				list.add(d);
+				filelist[files.indexOf(filename)] = filename.hashCode();
+			}
+			CombineJob c = new CombineJob(filelist, client.getHostAddress().replace(".", ""));
+			CompressJob comp = new CompressJob("myresult");
+			ForwardJob f = new ForwardJob();
+			list.add(c);
+			list.add(comp);
+			list.add(f);
+			
+			Activity activity = new Activity(list);
+
+			try {
+				System.out.println("Sending Activity to "
+						+ vm.getHostAddress());
+				sender.send(activity);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (JSchException e) {
+				e.printStackTrace();
 			}
 		}
 	}

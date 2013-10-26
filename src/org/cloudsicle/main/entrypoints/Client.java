@@ -48,47 +48,7 @@ public class Client implements IMessageHandler {
 	public void process(IMessage message) {
 		if (message instanceof Allocation) {
 			System.out.println("DEBUG: Received Allocation");			
-			createActivity((Allocation) message);
 		}
 
-	}
-
-	private void createActivity(Allocation alloc) {
-
-		ArrayList<IJob> list = new ArrayList<IJob>();
-		HashMap<InetAddress, List<String>> allocs = alloc.getAllocations();
-
-		for (InetAddress vm : allocs.keySet()) {
-			SocketSender sender = new SocketSender(false, vm);
-
-			ArrayList<String> files = (ArrayList<String>) allocs.get(vm);
-			int[] filelist = new int[files.size()];
-			for (String filename : files) {
-				DownloadJob d = new DownloadJob(
-						DefaultNetworkVariables.DEFAULT_FTP_PORT,
-						filename.hashCode());
-				list.add(d);
-				filelist[files.indexOf(filename)] = filename.hashCode();
-			}
-			CombineJob c = new CombineJob(filelist, "mygif.gif");
-			CompressJob comp = new CompressJob("myresult");
-			ForwardJob f = new ForwardJob();
-			list.add(c);
-			list.add(comp);
-			list.add(f);
-			
-			Activity activity = new Activity(list);
-			activity.setSender();
-
-			try {
-				System.out.println("Sending Activity to "
-						+ vm.getHostAddress());
-				sender.send(activity);
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (JSchException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 }

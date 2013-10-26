@@ -58,7 +58,6 @@ public class Session {
 		request.setFiles(files);
 		request.setTotalFileSize(totalFileSize(files));
 		request.setStarttime(System.currentTimeMillis());
-		request.setSender();
 		
 		try {
 			SocketSender sender = new SocketSender(true, server);

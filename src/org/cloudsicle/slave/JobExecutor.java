@@ -8,6 +8,8 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.cloudsicle.communication.SocketSender;
+import org.cloudsicle.main.VMState;
 import org.cloudsicle.main.jobs.CombineJob;
 import org.cloudsicle.main.jobs.CompressJob;
 import org.cloudsicle.main.jobs.DownloadJob;
@@ -15,17 +17,22 @@ import org.cloudsicle.main.jobs.ForwardJob;
 import org.cloudsicle.main.jobs.IJob;
 import org.cloudsicle.main.jobs.PresentJob;
 import org.cloudsicle.main.jobs.ProduceJob;
+import org.cloudsicle.messages.StatusUpdate;
 import org.kamranzafar.jtar.TarEntry;
 import org.kamranzafar.jtar.TarOutputStream;
+
+import com.jcraft.jsch.JSchException;
 
 public class JobExecutor {
 
 	private final IJob job;
 	private final JobType type;
+	private SocketSender updateable;
 	
 	private static ConcurrentHashMap<InetAddress, ConcurrentHashMap<Integer, String>> fileSystem = new ConcurrentHashMap<InetAddress, ConcurrentHashMap<Integer, String>>();
 	
-	public JobExecutor(IJob job){
+	public JobExecutor(IJob job, SocketSender updater){
+		this.updateable = updater;
 		this.job = job;
 		if (job instanceof CombineJob)
 			type = JobType.COMBINE;
@@ -45,8 +52,9 @@ public class JobExecutor {
 	
 	/**
 	 * Blocking execution of our job.
+	 * @throws JSchException 
 	 */
-	public void run() throws UnknownJobException, IOException{
+	public void run() throws UnknownJobException, IOException, JSchException{
 		switch (type){
 		case COMBINE:
 			executeCombineJob((CombineJob) job);
@@ -140,8 +148,9 @@ public class JobExecutor {
 		}
 	}
 	
-	private void executeForwardJob(ForwardJob job){
+	private void executeForwardJob(ForwardJob job) throws IOException, JSchException{
 		// TODO
+		updateable.send(new StatusUpdate("VM Done processing all jobs.", VMState.DONE)); //we are done
 	}
 	
 	private void executePresentJob(PresentJob job){
