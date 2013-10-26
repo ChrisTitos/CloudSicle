@@ -16,7 +16,7 @@ DISK   = [
 NIC    = [
   # NETWORK = "Small network"
   # OpenNebula API change: now refer to NETWORK ID:
-  NETWORK_ID=0
+  NETWORK_ID=1
 ]
 
 GRAPHICS = [
@@ -37,9 +37,10 @@ RAW = [
 CONTEXT = [
   hostname   = "$NAME",
   # OpenNebula API change: now refer to NETWORK ID:
-  dns        = "$NETWORK[DNS,     NETWORK_ID=0]",
-  gateway    = "$NETWORK[GATEWAY, NETWORK_ID=0]",
-  netmask    = "$NETWORK[NETMASK, NETWORK_ID=0]",
+  dns        = "$NETWORK[DNS,     NETWORK_ID=1]",
+  gateway    = "$NETWORK[GATEWAY, NETWORK_ID=1]",
+  netmask    = "$NETWORK[NETMASK, NETWORK_ID=1]",
+  ip_public = "$NIC[IP, NETWORK_ID=1]",
   files      = "/cm/shared/package/OpenNebula/current/srv/cloud/configs/centos-5/init.sh /var/scratch/in439204/OpenNebula/id_dsa.pub",
   target     = "hdc", 
   root_pubkey = "id_dsa.pub",

@@ -17,6 +17,7 @@ import org.opennebula.client.vm.VirtualMachine;
 public class SlaveVM {
 
 	private int id;
+	private Client client;
 	private VirtualMachine vm;
 	private InetAddress ip;
 	
@@ -29,18 +30,10 @@ public class SlaveVM {
 	 * @throws UninstantiableException If something went wrong when initializing
 	 */
 	public SlaveVM(Client client) throws UninstantiableException{
-		setUpId(client);
-		setUpVm(client);
-		setUpIp();
+		this.client = client;
 	}
 	
-	/**
-	 * Set up a new VM id
-	 * 
-	 * @param client The open nebula client
-	 * @throws UninstantiableException If something went wrong when requesting a new id
-	 */
-	private void setUpId(Client client) throws UninstantiableException{
+	public void createVM(){
 		ClassLoader cl = SlaveVM.class.getClassLoader();
 		String vmTemplate = new Scanner(cl.getResourceAsStream("centos-smallnet-qcow2.one")).useDelimiter("\\A").next();
 		OneResponse rc = VirtualMachine.allocate(client, vmTemplate);
@@ -49,20 +42,13 @@ public class SlaveVM {
 			throw new UninstantiableException();
 		
 		id = Integer.parseInt(rc.getMessage());
-	}
-	
-	/**
-	 * Set up a VirtualMachine object for this id
-	 * 
-	 * @param client The open nebula client
-	 * @throws UninstantiableException If something went wrong when holding a VM
-	 */
-	private void setUpVm(Client client) throws UninstantiableException{
 		vm = new VirtualMachine(id, client);
 		
-		/*OneResponse rc = vm.hold();
-		if (rc.isError())
-			throw new UninstantiableException();*/
+		setUpIp();
+	}
+	
+	public boolean isRunning(){		
+		return vm.lcmStateStr() == "RUNNING";
 	}
 	
 	/**

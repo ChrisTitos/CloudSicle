@@ -11,94 +11,109 @@ public class ResourcePool {
 
 	private Client openNebula;
 	private int maxVMs;
-	
-	private ArrayList<SlaveVM> vmsInUse = new ArrayList<SlaveVM>();  
-	private ArrayList<SlaveVM> vmsAvailable = new ArrayList<SlaveVM>();  
-	
+
+	private ArrayList<SlaveVM> vmsInUse = new ArrayList<SlaveVM>();
+	private ArrayList<SlaveVM> vmsAvailable = new ArrayList<SlaveVM>();
+
 	/**
-	 * Initialize the new Resource Pool
-	 * Defaults to a maximum of 20 VMs.
+	 * Initialize the new Resource Pool Defaults to a maximum of 20 VMs.
 	 * 
-	 * @throws ClientConfigurationException If the nebula client failed to initialize
+	 * @throws ClientConfigurationException
+	 *             If the nebula client failed to initialize
 	 */
-	public ResourcePool() throws ClientConfigurationException{
+	public ResourcePool() throws ClientConfigurationException {
 		this.openNebula = new Client();
 		this.maxVMs = 20;
-		addVM(); //create an initial VM
+		addVM(); // create an initial VM
 	}
-	
+
 	/**
 	 * Initialize the new Resource Pool
 	 * 
-	 * @param maxvms The maximum amount of VMs
-	 * @throws ClientConfigurationException If the nebula client failed to initialize
+	 * @param maxvms
+	 *            The maximum amount of VMs
+	 * @throws ClientConfigurationException
+	 *             If the nebula client failed to initialize
 	 */
-	public ResourcePool(int maxvms) throws ClientConfigurationException{
+	public ResourcePool(int maxvms) throws ClientConfigurationException {
 		this.openNebula = new Client();
 		this.maxVMs = maxvms;
 	}
-	
+
 	/**
 	 * Add a virtual machine to our pool.
 	 * 
 	 * @return The virtual machine we created
-	 * @throws UninstantiableException If something went wrong creating the vm
+	 * @throws UninstantiableException
+	 *             If something went wrong creating the vm
 	 */
-	private SlaveVM addVM() throws UninstantiableException{
-		SlaveVM slave = new SlaveVM(openNebula);
-		slave.initialize();
-		return slave;
+	private void addVM() {
+		final SlaveVM slave = new SlaveVM(openNebula);
+		slave.createVM();
+		Thread creator = new Thread() {
+			public void run() {
+				while (!slave.isRunning()) {
+
+				}
+				if (slave.initialize()) {
+					vmsAvailable.add(slave);
+				}
+			}
+		};
+		creator.start();
 	}
-	
+
 	/**
 	 * Remove a virtual machine from our pool.
 	 * 
-	 * @param vm The VM to be removed
-	 * @throws UnreachableVMException If we could not reach the VM to tell them to shut down
+	 * @param vm
+	 *            The VM to be removed
+	 * @throws UnreachableVMException
+	 *             If we could not reach the VM to tell them to shut down
 	 */
-	private void removeVM(SlaveVM vm) throws UnreachableVMException{
+	private void removeVM(SlaveVM vm) throws UnreachableVMException {
 		if (vmsInUse.contains(vm))
 			vmsInUse.remove(vm);
 		if (vmsAvailable.contains(vm))
 			vmsAvailable.remove(vm);
 		vm.hardExit();
 	}
-	
+
 	/**
 	 * Request a new VM for use.
 	 * 
-	 * @return A Slave VM to work on, or null if something went wrong in the creation
+	 * @return A Slave VM to work on, or null if we have to wait for a VM to start up
 	 */
-	public SlaveVM requestVM(){
+	public SlaveVM requestVM() {
 		if (vmsInUse.size() >= maxVMs)
 			return null;
-		if (vmsAvailable.size() > 0){
+		if (vmsAvailable.size() > 0) {
 			SlaveVM vm = vmsAvailable.remove(0);
 			vmsInUse.add(vm);
 			return vm;
 		}
-		try{
-			SlaveVM vm = addVM();
-			vmsInUse.add(vm);
-			return vm;
-		} catch (UninstantiableException e){
+		try {
+			addVM();
+			return null;
+		} catch (UninstantiableException e) {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Signal a Slave VM is no longer used
 	 * 
-	 * @param vm The VM to release.
+	 * @param vm
+	 *            The VM to release.
 	 */
-	public void releaseVM(SlaveVM vm){
+	public void releaseVM(SlaveVM vm) {
 		removeVM(vm);
 	}
-	
+
 	/**
 	 * Hard exit all VMs in our control.
 	 */
-	public void exit(){
+	public void exit() {
 		for (SlaveVM vm : vmsInUse)
 			removeVM(vm);
 		for (SlaveVM vm : vmsAvailable)

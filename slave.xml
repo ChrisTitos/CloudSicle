@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project CloudSicle">
+    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
+    <!--ANT 1.7 is required                                        -->
+    <target name="create_run_jar">
+        <jar destfile="C:/Users/Christiaan/Documents/GitHub/CloudSicle/dist/slave.jar" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Main-Class" value="org.cloudsicle.main.entrypoints.Slave"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+            <fileset dir="C:/Users/Christiaan/Documents/GitHub/CloudSicle/bin"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Users/Christiaan/Documents/GitHub/CloudSicle/lib/org.opennebula.client.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Users/Christiaan/Documents/GitHub/CloudSicle/lib/commons-logging-1.1.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Users/Christiaan/Documents/GitHub/CloudSicle/lib/ws-commons-util-1.0.2.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Users/Christiaan/Documents/GitHub/CloudSicle/lib/xmlrpc-client-3.1.3.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Users/Christiaan/Documents/GitHub/CloudSicle/lib/xmlrpc-common-3.1.3.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Users/Christiaan/Documents/GitHub/CloudSicle/lib/jsch-0.1.50.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Users/Christiaan/Documents/GitHub/CloudSicle/lib/jtar-2.2.jar"/>
+        </jar>
+    </target>
+</project>
