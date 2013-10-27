@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.lang.instrument.Instrumentation;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -16,6 +18,11 @@ import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
+
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 
 import sun.instrument.InstrumentationImpl;
 
@@ -88,18 +95,90 @@ public class FTPService {
 	}
 	
 	/**
+	 * Download a file from a certain peer using normal Sockets.
+	 * 
+	 * @param ip The peer to connect to
+	 * @param outputFolder The output folder to write to WITH FINAL PATH SEPARATOR
+	 * @return True if the download succeeded, False if it failed
+	 */
+	public boolean downloadSock(InetAddress ip, String sessionid, String outputFolder){
+		try {
+			Socket s = new Socket(ip,DefaultNetworkVariables.DEFAULT_FTP_PORT);
+			InputStream is = s.getInputStream();
+			OutputStream os = s.getOutputStream();
+			boolean success = download(is,os,sessionid,outputFolder);
+			s.close();
+			return success;
+		} catch (IOException e) {
+			return false;
+		}
+	}
+	
+	/**
+	 * Download a file from a certain peer using normal ssh.
+	 * 
+	 * @param ip The peer to connect to
+	 * @param outputFolder The output folder to write to WITH FINAL PATH SEPARATOR
+	 * @return True if the download succeeded, False if it failed
+	 */
+	public boolean downloadSSH(InetAddress ip, boolean toVM, String sessionid, String outputFolder){
+		try {
+			JSch jsch = new JSch();
+			Session session;
+			if (toVM) {
+				session = jsch.getSession("root", ip.getHostAddress(), 22);
+			} else {
+				session = jsch
+						.getSession("in439204", ip.getHostAddress(), 22);
+				session.setPassword("Pkk6gE5g");
+			}
+
+			session.setConfig("StrictHostKeyChecking", "no");
+			session.connect();
+
+			PipedInputStream pis = new PipedInputStream();
+			PipedOutputStream fwdOutput = new PipedOutputStream(pis);
+			
+			PipedOutputStream pos = new PipedOutputStream();
+			PipedInputStream fwdInput = new PipedInputStream(pos);
+
+			Channel channel = session.getStreamForwarder(ip.getHostAddress(), DefaultNetworkVariables.DEFAULT_FTP_PORT);
+			channel.setInputStream(pis);
+			channel.setOutputStream(pos);
+			channel.connect(1000);
+
+			boolean success = download(fwdInput,fwdOutput,sessionid,outputFolder);
+			
+			while (!channel.isClosed())
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					break;
+				}
+
+			channel.disconnect();
+			
+			return success;
+		} catch (IOException e) {
+			return false;
+		} catch (JSchException e1) {
+			return false;
+		}
+	}
+	
+	/**
 	 * Download a file from a certain peer.
 	 * 
 	 * @param ip The peer to connect to
 	 * @param outputFolder The output folder to write to WITH FINAL PATH SEPARATOR
 	 * @return True if the download succeeded, False if it failed
 	 */
-	public boolean download(InetAddress ip, String session, String outputFolder){
+	private boolean download(InputStream inStream, OutputStream outStream, String session, String outputFolder){
 		try{
-			Socket s = new Socket(ip,DefaultNetworkVariables.DEFAULT_FTP_PORT);
-			InputStream is = s.getInputStream();
+			InputStream is = inStream;
 			//Write our session identifier
-			ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+			ObjectOutputStream oos = new ObjectOutputStream(outStream);
 			oos.writeObject(session);
 			oos.flush();
 			oos.close();
@@ -129,7 +208,6 @@ public class FTPService {
 				fos.close();
 			}
 			is.close();
-			s.close();
 			return true;
 		} catch (IOException e){
 			return false;
