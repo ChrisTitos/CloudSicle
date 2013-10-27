@@ -15,9 +15,22 @@ public class ForwardJob implements IJob, Serializable, INeedOwnIP {
 	private final String name;
 	
 	/**
-	 * Forward the results to the sender of this message
+	 * Forward the results to the sender of this message.
 	 * 
 	 * @param compressed Whether we send the job's output.tar.gz (True) or output.gif (False)
+	 */
+	public ForwardJob(boolean compressed){
+		this.target = null;
+		this.compressed = compressed;
+		this.name = "output";
+	}
+	
+	/**
+	 * Forward the results to the sender of this message
+	 * with a non-standard output name.
+	 * 
+	 * @param compressed Whether we send the job's output.tar.gz (True) or output.gif (False)
+	 * @param name The output name
 	 */
 	public ForwardJob(boolean compressed, String name){
 		this.target = null;
@@ -26,9 +39,24 @@ public class ForwardJob implements IJob, Serializable, INeedOwnIP {
 	}
 	
 	/**
-	 * Forward the results to a specified target
+	 * Forward the results to a specified target.
 	 * 
+	 * @param compressed Whether we send the job's output.tar.gz (True) or output.gif (False)
 	 * @param target The target to send results to
+	 */
+	public ForwardJob(boolean compressed, InetAddress target){
+		this.target = target;
+		this.compressed = compressed;
+		this.name = "output";
+	}
+	
+	/**
+	 * Forward the results to a specified target
+	 * with a non-standard output name.
+	 * 
+	 * @param compressed Whether we send the job's output.tar.gz (True) or output.gif (False)
+	 * @param target The target to send results to
+	 * @param name The output name
 	 */
 	public ForwardJob(boolean compressed, String name, InetAddress target){
 		this.target = target;

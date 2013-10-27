@@ -102,9 +102,9 @@ public class Scheduler implements Runnable {
 				list.add(d);
 				filelist[files.indexOf(filename)] = filename.hashCode();
 			}
-			CombineJob c = new CombineJob(filelist, client.getHostAddress().replace(".", ""));
-			CompressJob comp = new CompressJob("myresult");
-			ForwardJob f = new ForwardJob();
+			CombineJob c = new CombineJob(filelist);
+			CompressJob comp = new CompressJob();
+			ForwardJob f = new ForwardJob(true, client);
 			list.add(c);
 			list.add(comp);
 			list.add(f);

@@ -15,6 +15,23 @@ public class CombineJob implements IJob, INeedOwnIP, Serializable {
 	private final String name;
 	private InetAddress ip;
 	
+	/**
+	 * Create a combine job with a list of file identifiers.
+	 * 
+	 * @param files The file identifiers to combine into one gif
+	 */
+	public CombineJob(int[] files){
+		this.files = files;
+		this.name = "output";
+	}
+	
+	/**
+	 * Create a combine job with a list of file identifiers
+	 * with a non-standard output name.
+	 * 
+	 * @param files The file identifiers to combine into one gif
+	 * @param name The output name
+	 */
 	public CombineJob(int[] files, String name){
 		this.files = files;
 		this.name = name;

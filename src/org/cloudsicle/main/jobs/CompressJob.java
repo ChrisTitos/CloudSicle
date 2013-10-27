@@ -14,6 +14,19 @@ public class CompressJob implements IJob, INeedOwnIP, Serializable {
 	private final String name;
 	private InetAddress ip;
 	
+	/**
+	 * Create a compression job for the current user.
+	 */
+	public CompressJob(){
+		this.name = "output";
+	}
+	
+	/**
+	 * Create a compression job for the current user
+	 * with a non-standard output name.
+	 * 
+	 * @param name The output name
+	 */
 	public CompressJob(String name){
 		this.name = name;
 	}
