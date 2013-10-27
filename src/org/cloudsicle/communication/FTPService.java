@@ -72,7 +72,7 @@ public class FTPService {
 	 * @param timeout The timeout in milliseconds to wait for the file to start downloading
 	 * @return True if the file was transferred, False if a timeout occurred, the server has not started or the server has an error
 	 */
-	public boolean offer(String descriptor, HashMap<Integer, String> filemapping, int timeout){
+	public static boolean offer(String descriptor, HashMap<Integer, String> filemapping, int timeout){
 		if (downloadServer.hasError() || !downloadServer.hasStarted())
 			return false;
 		//Offer the download
@@ -101,7 +101,7 @@ public class FTPService {
 	 * @param outputFolder The output folder to write to WITH FINAL PATH SEPARATOR
 	 * @return True if the download succeeded, False if it failed
 	 */
-	public boolean downloadSock(InetAddress ip, String sessionid, String outputFolder){
+	public static boolean downloadSock(InetAddress ip, String sessionid, String outputFolder){
 		try {
 			Socket s = new Socket(ip,DefaultNetworkVariables.DEFAULT_FTP_PORT);
 			InputStream is = s.getInputStream();
@@ -121,7 +121,7 @@ public class FTPService {
 	 * @param outputFolder The output folder to write to WITH FINAL PATH SEPARATOR
 	 * @return True if the download succeeded, False if it failed
 	 */
-	public boolean downloadSSH(InetAddress ip, boolean toVM, String sessionid, String outputFolder){
+	public static boolean downloadSSH(InetAddress ip, boolean toVM, String sessionid, String outputFolder){
 		try {
 			JSch jsch = new JSch();
 			Session session;
@@ -175,7 +175,7 @@ public class FTPService {
 	 * @param outputFolder The output folder to write to WITH FINAL PATH SEPARATOR
 	 * @return True if the download succeeded, False if it failed
 	 */
-	private boolean download(InputStream inStream, OutputStream outStream, String session, String outputFolder){
+	private static boolean download(InputStream inStream, OutputStream outStream, String session, String outputFolder){
 		try{
 			InputStream is = inStream;
 			//Write our session identifier
