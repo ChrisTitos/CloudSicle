@@ -11,6 +11,12 @@ import org.opennebula.client.Client;
 import org.opennebula.client.OneResponse;
 import org.opennebula.client.vm.VirtualMachine;
 
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+
 /**
  * A slave VM as seen by the Master
  */
@@ -140,24 +146,48 @@ public class SlaveVM {
 	 * @return Whether we succeeded in starting the remote jar
 	 */
 	public boolean initialize(){
-		System.out.println("DEBUG: Moving slave.jar to VM " + ip);
+		System.out.println("DEBUG: Deploying slave.jar to VM " + ip);
 		SocketSender sender = new SocketSender(false, ip);
 		sender.sendFile("slave.jar");
-		return true;
-		/*try {
-			
-			Process p = Runtime.getRuntime().exec(buildCommand());
-			int result = p.waitFor();
-			System.out.println("Succes? " + result);
+		
+		JSch jsch = new JSch();
+		Session session;
+		try {
+			session = jsch.getSession("root", ip.getHostAddress(), 22);
+			session.setConfig("StrictHostKeyChecking", "no");
+			session.connect();
+			 Channel channel=session.openChannel("exec");
+			 ((ChannelExec)channel).setCommand("java -jar slave.jar");
+			 channel.connect();
+			 channel.disconnect();
+			 session.disconnect();
 			
 			return true;
-		} catch (IOException e){
-			e.printStackTrace();
+
+		} catch (JSchException e) {
 			return false;
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		}
+	}
+	
+	public boolean testConnection() {
+		JSch jsch = new JSch();
+		try {
+			jsch.addIdentity("~/.ssh/id_dsa");
+
+			Session session = jsch.getSession("opennebula",
+					ip.getHostAddress(), 22);
+			session.setConfig("StrictHostKeyChecking", "no");
+			
+
+			session.connect();
+
+			session.disconnect();
+			return true;
+		} catch (JSchException e) {
+			System.out.println("No SSH possible to " + ip + ", " + e.getMessage());
 			return false;
-		}*/
+		}
+
 	}
 	
 }

@@ -53,8 +53,13 @@ public class ResourcePool {
 		Thread creator = new Thread() {
 			public void run() {
 				while (!slave.getVm().lcmStateStr().equals("RUNNING")) {slave.getVm().info();}
-				System.out.println(slave.getVm().stateStr());
-
+				System.out.println("VM " + slave.getId() + " " + slave.getVm().stateStr());
+				while(!slave.testConnection()){try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}}
+				System.out.println("VM " + slave.getId() + " SSH connection established");
 				if (slave.initialize()) {
 					vmsAvailable.add(slave);
 				}
