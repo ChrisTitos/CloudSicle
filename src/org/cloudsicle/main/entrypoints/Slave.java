@@ -62,7 +62,7 @@ public class Slave implements IMessageHandler{
 		if (message instanceof Activity){
 			try {
 				StatusUpdate status = new StatusUpdate("VM Received Activity", VMState.EXECUTING);
-				SocketSender sender = new SocketSender(false, ((Activity) message).getIP());		
+				SocketSender sender = new SocketSender(false, ((Activity) message).getSender());		
 			
 				ArrayList<IJob> jobs = ((Activity) message).getJobs();
 				
@@ -75,7 +75,7 @@ public class Slave implements IMessageHandler{
 				
 				for (IJob job : jobs){
 					if (job instanceof INeedOwnIP)
-						((INeedOwnIP)job).setIP(((Activity) message).getIP());
+						((INeedOwnIP)job).setIP(((Activity) message).getSender());
 					synchronized (jobQueue){
 						jobQueue.add(job);
 					}
@@ -88,7 +88,7 @@ public class Slave implements IMessageHandler{
 				e.printStackTrace();
 			}
 		} else if (message instanceof SoftExit){
-			SocketSender sender = new SocketSender(false, ((SoftExit) message).getIP());
+			SocketSender sender = new SocketSender(false, ((SoftExit) message).getSender());
 			if (thread != null){
 				//We are processing jobs
 				thread.callExitOnFinish(true);

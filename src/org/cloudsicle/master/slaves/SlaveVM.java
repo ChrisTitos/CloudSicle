@@ -151,8 +151,11 @@ public class SlaveVM {
 		sender.sendFile("slave.jar");
 		
 		JSch jsch = new JSch();
+		
 		Session session;
 		try {
+			jsch.addIdentity("~/.ssh/id_dsa");
+
 			session = jsch.getSession("root", ip.getHostAddress(), 22);
 			session.setConfig("StrictHostKeyChecking", "no");
 			session.connect();
@@ -165,6 +168,7 @@ public class SlaveVM {
 			return true;
 
 		} catch (JSchException e) {
+			e.printStackTrace();
 			return false;
 		}
 	}

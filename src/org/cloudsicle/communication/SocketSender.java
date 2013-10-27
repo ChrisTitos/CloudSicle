@@ -95,6 +95,7 @@ public class SocketSender {
 			session.setPassword("Pkk6gE5g");
 		}
 
+		jsch.addIdentity("~/.ssh/id_dsa");
 		session.setConfig("StrictHostKeyChecking", "no");
 		session.connect();
 

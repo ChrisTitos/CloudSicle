@@ -52,16 +52,23 @@ public class ResourcePool {
 		slave.createVM();
 		Thread creator = new Thread() {
 			public void run() {
-				while (!slave.getVm().lcmStateStr().equals("RUNNING")) {slave.getVm().info();}
-				System.out.println("VM " + slave.getId() + " " + slave.getVm().stateStr());
-				while(!slave.testConnection()){try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}}
-				System.out.println("VM " + slave.getId() + " SSH connection established");
+				while (!slave.getVm().lcmStateStr().equals("RUNNING")) {
+					slave.getVm().info();
+				}
+				System.out.println("VM " + slave.getId() + " "
+						+ slave.getVm().stateStr());
+				while (!slave.testConnection()) {
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				System.out.println("VM " + slave.getId()
+						+ " SSH connection established");
 				if (slave.initialize()) {
 					vmsAvailable.add(slave);
+					System.out.println("VM " + slave.getId() + " now available. " + vmsAvailable.size() + " VMs in total");
 				}
 			}
 		};
@@ -97,12 +104,13 @@ public class ResourcePool {
 			SlaveVM vm = vmsAvailable.remove(0);
 			vmsInUse.add(vm);
 			return vm;
-		}
-		try {
-			addVM();
-			return null;
-		} catch (UninstantiableException e) {
-			return null;
+		} else {
+			try {
+				addVM();
+				return null;
+			} catch (UninstantiableException e) {
+				return null;
+			}
 		}
 	}
 
