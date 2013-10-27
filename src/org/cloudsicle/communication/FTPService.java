@@ -1,5 +1,7 @@
 package org.cloudsicle.communication;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -15,6 +17,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
@@ -177,25 +180,41 @@ public class FTPService {
 	 */
 	private static boolean download(InputStream inStream, OutputStream outStream, String session, String outputFolder){
 		try{
-			InputStream is = inStream;
 			//Write our session identifier
+			System.out.println("DEBUG: Attempting to download session \"" + session + "\"");
 			ObjectOutputStream oos = new ObjectOutputStream(outStream);
 			oos.writeObject(session);
 			oos.flush();
-			oos.close();
 			//Read the O.K. signal
-			int ok = is.read();
-			while (ok != -1)
-				ok = is.read();
-			if (ok != 1)
-				//Uploader signaled our session does not exist
+			System.out.println("DEBUG: Waiting for uploader session O.K.");
+			int ok = inStream.read();
+			int timeout = 100;
+			while (ok == -1 && timeout > 0){
+				ok = inStream.read();
+				try { Thread.sleep(50);} catch (InterruptedException e) {}
+				timeout--;
+			}
+			if (timeout == 0){
+				System.out.println("DEBUG: Did not receive uploader O.K, exiting");
+				inStream.close();
+				outStream.close();
 				return false;
+			}
+			if (ok == 0){
+				//Uploader signaled our session does not exist
+				System.out.println("DEBUG: Uploader could not service download request, exiting");
+				inStream.close();
+				outStream.close();
+				return false;
+			}
+			System.out.println("DEBUG: Download session O.K., starting download");
 			
+			BufferedInputStream is = new BufferedInputStream(inStream);
 			//We are now going to receive a lot of data
 			while (true){
 				byte[] b_fileid = new byte[4];
 				byte[] b_filesize = new byte[8];
-				if (is.read(b_fileid) == 0)
+				if (is.read(b_fileid) == -1)
 					break; // EOF
 				is.read(b_filesize);
 				
@@ -206,16 +225,20 @@ public class FTPService {
 				
 				//Write the specified amount of bytes to the output file associated with this fileid
 				FileOutputStream fos = new FileOutputStream(outputFolder + fileid + ".gif");
-				for (int i = 0; i < filesize; i++)
+				for (long i = 0; i < filesize; i++)
 					fos.write(is.read());
 				fos.close();
 				
 				System.out.println("DONE!");
 				System.out.println("DEBUG: Stored in " + outputFolder + fileid + ".gif");
 			}
+			oos.close();
 			is.close();
+			
+			System.out.println("DEBUG: Finished session \"" + session + "\"");
 			return true;
 		} catch (IOException e){
+			e.printStackTrace();
 			return false;
 		}
 	}
@@ -245,20 +268,25 @@ public class FTPService {
 				while (alive){
 					try {
 						Socket s = serverSocket.accept();
-						OutputStream os = s.getOutputStream();
+						OutputStream os = new BufferedOutputStream(s.getOutputStream());
+						
+						System.out.println("DEBUG: Accepted new FTP request from " + s.getRemoteSocketAddress());
 						
 						//Wait for the downloader to put his session description on the stream
 						int timeout = 100;				
-						while(s.getInputStream().available() < 80 && timeout > 0){
+						while(s.getInputStream().available() < 10 && timeout > 0){
 							try { Thread.sleep(50);} catch (InterruptedException e) {}
 							timeout--;
 						}
 						if (timeout == 0){
+							System.out.println("DEBUG: Did not receive FTP session identifier, dropping connection");
 							continue;
 						}
 						
 						ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
 						String session = (String) ois.readObject();
+						
+						System.out.println("DEBUG: Starting upload session \"" + session + "\"");
 						
 						//Receive session identifier
 						boolean knownsession = false;
@@ -267,12 +295,15 @@ public class FTPService {
 						}
 						if (!knownsession){
 							//If an unknown session is being requested send a 0 (false)
+							System.out.println("DEBUG: Unknown download session requested, exiting");
 							os.write(0);
+							os.flush();
 							s.close();
 							continue;
 						}
 						//If an known session is being requested send a 1 (true)
 						os.write(1);
+						os.flush();
 						
 						HashMap<Integer, String> filemapping = null;
 						synchronized(openDownloadables){
@@ -288,21 +319,26 @@ public class FTPService {
 							os.write(identifier);
 							
 							//Put the file size on the stream
-							long filesize = new File(fpath).getTotalSpace();
+							long filesize = new File(fpath).length();
 							byte[] filesizeheader = ByteBuffer.allocate(8).putLong(filesize).array();
 							os.write(filesizeheader);
+							os.flush();
+							
+							System.out.println("DEBUG: Sending fileid " + map.intValue() + " (" + filesize + " bytes)");
 							
 							//Write the raw file to stream
 							int data = 0;
 							while ((data = fis.read()) != -1)
 								os.write(data);
-							
 							fis.close();
+							System.out.println("DEBUG: Done sending file");
+							os.flush();
 						}
 						
-						os.flush();
 						os.close();
 						s.close();
+						
+						System.out.println("DEBUG: Finished session \"" + session + "\"");
 	
 					} catch (ClassNotFoundException e) {
 						System.err.println("Failed to read session descriptor from stream!");
@@ -319,4 +355,26 @@ public class FTPService {
 			}
 		}
 	}
+	
+	/*
+	 * Quinten's tests
+	 */
+	/*
+	//Uploader
+	public static void main(String[] args){
+		FTPService.start();
+		HashMap<Integer, String> filemapping = new HashMap<Integer, String>();
+		filemapping.put(0, "/home/quinten/Mario.gif");
+		filemapping.put(1, "/home/quinten/Mario2.gif");
+		FTPService.offer("test", filemapping, 30000);
+		FTPService.stop();
+	}
+	//
+	//
+	//Downloader
+	public static void main(String[] args) throws UnknownHostException{
+		InetAddress localhost = InetAddress.getByName("192.168.178.21");
+		FTPService.downloadSock(localhost, "test", "in4392test" + File.separator);
+	}
+	*/
 }
