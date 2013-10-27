@@ -15,8 +15,6 @@ import org.cloudsicle.main.jobs.CompressJob;
 import org.cloudsicle.main.jobs.DownloadJob;
 import org.cloudsicle.main.jobs.ForwardJob;
 import org.cloudsicle.main.jobs.IJob;
-import org.cloudsicle.main.jobs.PresentJob;
-import org.cloudsicle.main.jobs.ProduceJob;
 import org.cloudsicle.messages.StatusUpdate;
 import org.kamranzafar.jtar.TarEntry;
 import org.kamranzafar.jtar.TarOutputStream;
@@ -42,10 +40,6 @@ public class JobExecutor {
 			type = JobType.DOWNLOAD;
 		else if (job instanceof ForwardJob)
 			type = JobType.FORWARD;
-		else if (job instanceof PresentJob)
-			type = JobType.PRESENT;
-		else if (job instanceof ProduceJob)
-			type = JobType.PRODUCE;
 		else
 			type = JobType.UNKNOWN;
 	}
@@ -67,12 +61,6 @@ public class JobExecutor {
 			break;
 		case FORWARD:
 			executeForwardJob((ForwardJob) job);
-			break;
-		case PRESENT:
-			executePresentJob((PresentJob) job);
-			break;
-		case PRODUCE:
-			executeProduceJob((ProduceJob) job);
 			break;
 		case UNKNOWN:
 			throw new UnknownJobException();
@@ -152,14 +140,6 @@ public class JobExecutor {
 	private void executeForwardJob(ForwardJob job) throws IOException, JSchException{
 		// TODO
 		updateable.send(new StatusUpdate("VM Done processing all jobs.", VMState.DONE)); //we are done
-	}
-	
-	private void executePresentJob(PresentJob job){
-		// TODO
-	}
-	
-	private void executeProduceJob(ProduceJob job){
-		// TODO
 	}
 	
 	private enum JobType{
