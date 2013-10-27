@@ -61,6 +61,8 @@ public class Session {
 		
 		try {
 			SocketSender sender = new SocketSender(true, server);
+			System.out.println("Sending MetaData to server");
+
 			sender.send(request);
 			return true;
 		} catch (IOException e) {

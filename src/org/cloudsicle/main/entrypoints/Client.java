@@ -40,8 +40,7 @@ public class Client implements IMessageHandler {
 	}
 
 	public Client() throws IOException {
-		this.listener = new SocketListener(this);
-		this.listener.start();
+		
 	}
 
 	@Override

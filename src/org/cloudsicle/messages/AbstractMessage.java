@@ -14,7 +14,7 @@ abstract class AbstractMessage implements IMessage {
 		
 		URL whatismyip;
 		try {
-			whatismyip = new URL("http://bot.whatismyipaddress.com");
+			whatismyip = new URL("http://icanhazip.com");
 		
 		BufferedReader in = new BufferedReader(new InputStreamReader(
 		                whatismyip.openStream()));
