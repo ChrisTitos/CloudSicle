@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -137,8 +138,34 @@ public class JobExecutor {
 		updateable.send(new StatusUpdate("VM Executing DownloadJob", VMState.EXECUTING));
 	}
 	
+	/**
+	 * Forward the specified output and associated resource files
+	 * to another peer.
+	 * 
+	 * @param job The forward job to execute
+	 * @throws IOException If the file could not be forwarded
+	 */
 	private void executeForwardJob(ForwardJob job) throws IOException, JSchException{
-		// TODO
+		InetAddress ip = job.getTarget();
+		String file = "";
+		// Note that the path for output IS NOT THE SAME as the ip to forward to
+		if (job.isTarForwarder()){
+			file = FileLocations.pathForTar(job.getIP(), job.getFileName());
+		} else {
+			file = FileLocations.pathForOutput(job.getIP(), job.getFileName());
+		}
+		// TODO forward the contents of 'file' to 'ip'
+		// Now that we have completed our business, clear up all the resources associated with
+		// this set of jobs.
+		if (job.isTarForwarder())
+			new File(FileLocations.pathForTar(job.getIP(), job.getFileName())).delete();
+		new File(FileLocations.pathForOutput(job.getIP(), job.getFileName())).delete();
+		ConcurrentHashMap<Integer, String> fileMapping = null;
+		synchronized (fileSystem){
+			fileMapping = fileSystem.remove(job.getIP());
+		}
+		for (String path : fileMapping.values())
+			new File(path).delete();
 		updateable.send(new StatusUpdate("VM Done processing all jobs.", VMState.DONE)); //we are done
 	}
 	
