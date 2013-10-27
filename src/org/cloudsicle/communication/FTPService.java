@@ -133,6 +133,7 @@ public class FTPService {
 				session.setPassword("Pkk6gE5g");
 			}
 
+			jsch.addIdentity("~/.ssh/id_dsa");
 			session.setConfig("StrictHostKeyChecking", "no");
 			session.connect();
 
@@ -201,11 +202,16 @@ public class FTPService {
 				int fileid = ByteBuffer.wrap(b_fileid).getInt();
 				long filesize = ByteBuffer.wrap(b_filesize).getLong();
 				
+				System.out.print("DEBUG: Downloading fileid " + fileid + " (" + filesize + " bytes).. ");
+				
 				//Write the specified amount of bytes to the output file associated with this fileid
 				FileOutputStream fos = new FileOutputStream(outputFolder + fileid + ".gif");
 				for (int i = 0; i < filesize; i++)
 					fos.write(is.read());
 				fos.close();
+				
+				System.out.println("DONE!");
+				System.out.println("DEBUG: Stored in " + outputFolder + fileid + ".gif");
 			}
 			is.close();
 			return true;
