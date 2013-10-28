@@ -17,8 +17,10 @@ public class Master implements IMessageHandler {
 	private Scheduler scheduler;
 	private SocketListener listener;
 	private Monitor monitor;
+	private int jobcounter;
 
 	public Master() throws Exception {
+		this.jobcounter = 1;
 		this.monitor = new Monitor();
 		this.scheduler = new Scheduler(this.monitor);
 		this.listener = new SocketListener(this);
@@ -35,9 +37,13 @@ public class Master implements IMessageHandler {
 	@Override
 	public void process(IMessage message) {
 		if (message instanceof JobMetaData) {
-			System.out.println("DEBUG: Received JobMetaData from " + ((JobMetaData) message).getSender());
-			this.monitor.addjobWaiting((JobMetaData) message);
-			this.scheduler.schedule((JobMetaData) message);
+			JobMetaData meta = (JobMetaData) message;
+			meta.setId(this.jobcounter);
+			this.jobcounter++;
+			
+			System.out.println("DEBUG: Received JobMetaData" + meta.getId() + " from " + meta.getSender());
+			this.monitor.addjobWaiting(meta);
+			this.scheduler.schedule(meta);
 		} else if (message instanceof StatusUpdate) {
 			((StatusUpdate)message).getSender();
 			System.out.println(((StatusUpdate) message).getMessage());

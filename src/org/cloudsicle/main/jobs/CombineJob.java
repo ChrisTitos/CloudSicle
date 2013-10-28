@@ -9,12 +9,11 @@ import java.util.ArrayList;
 import org.cloudsicle.communication.INeedOwnIP;
 import org.cloudsicle.slave.FileLocations;
 
-public class CombineJob implements IJob, INeedOwnIP, Serializable {
+public class CombineJob extends AbstractJob implements Serializable {
 
 	private static final long serialVersionUID = -855918850745018227L;
 	private final ArrayList<Integer> files;
 	private final String name;
-	private InetAddress ip;
 	
 	/**
 	 * Create a combine job with a list of file identifiers.
@@ -46,16 +45,6 @@ public class CombineJob implements IJob, INeedOwnIP, Serializable {
 		return name;
 	}
 
-	@Override
-	public void setIP(InetAddress ip) {
-		this.ip = ip;
-	}
-
-	@Override
-	public InetAddress getIP() {
-		return ip;
-	}
-	
 	public String conjureOutputFile() throws IOException{
 		String out = FileLocations.pathForOutput(ip, name);
 		File f = new File(out);

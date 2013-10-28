@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import org.cloudsicle.communication.FTPService;
 
-public class DownloadJob implements IJob, Serializable {
+public class DownloadJob extends AbstractJob implements Serializable {
 	
 	private static final long serialVersionUID = -8173332718020415882L;
 	

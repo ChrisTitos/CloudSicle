@@ -14,6 +14,8 @@ public class JobMetaData extends AbstractMessage implements INeedOwnIP {
 
 	private static final long serialVersionUID = 4966126383441403840L;
 	
+	private int id;
+	
 	private InetAddress client;
 
 	private int totalFileSize;
@@ -22,7 +24,14 @@ public class JobMetaData extends AbstractMessage implements INeedOwnIP {
 	private long starttime;
 	private long endtime;
 	
-
+	public void setId(int id){
+		this.id = id;
+	}
+	
+	public int getId(){
+		return this.id;
+	}
+	
 	public int getTotalFileSize() {
 		return totalFileSize;
 	}

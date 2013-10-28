@@ -5,11 +5,10 @@ import java.net.InetAddress;
 
 import org.cloudsicle.communication.INeedOwnIP;
 
-public class ForwardJob implements IJob, Serializable, INeedOwnIP {
+public class ForwardJob extends AbstractJob implements Serializable {
 
 	private static final long serialVersionUID = 7668738592907238533L;
 
-	private InetAddress ip;
 	private final boolean compressed; 
 	private final String name;
 	
@@ -33,16 +32,6 @@ public class ForwardJob implements IJob, Serializable, INeedOwnIP {
 	public ForwardJob(boolean compressed, String name){
 		this.compressed = compressed;
 		this.name = name;
-	}
-	
-	@Override
-	public void setIP(InetAddress ip) {
-		this.ip = ip;
-	}
-
-	@Override
-	public InetAddress getIP() {
-		return ip;
 	}
 	
 	public String getFileName(){
