@@ -10,6 +10,7 @@ import java.util.List;
 import org.cloudsicle.client.Session;
 import org.cloudsicle.client.gui.Frontend;
 import org.cloudsicle.communication.DefaultNetworkVariables;
+import org.cloudsicle.communication.FTPService;
 import org.cloudsicle.communication.IMessageHandler;
 import org.cloudsicle.communication.SocketListener;
 import org.cloudsicle.communication.SocketSender;
@@ -36,11 +37,16 @@ public class Client implements IMessageHandler {
 		}
 		Session s = new Session();
 		Frontend.launch(s); 
-
 	}
 
 	public Client() throws IOException {
-		
+		FTPService.start();
+	}
+	
+	@Override
+	public void finalize() throws Throwable{
+		FTPService.stop();
+		super.finalize();
 	}
 
 	@Override

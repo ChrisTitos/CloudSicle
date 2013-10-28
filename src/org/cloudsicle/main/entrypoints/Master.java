@@ -1,5 +1,6 @@
 package org.cloudsicle.main.entrypoints;
 
+import org.cloudsicle.communication.FTPService;
 import org.cloudsicle.communication.IMessageHandler;
 import org.cloudsicle.communication.SocketListener;
 import org.cloudsicle.master.Monitor;
@@ -19,6 +20,13 @@ public class Master implements IMessageHandler {
 		this.scheduler = new Scheduler(this.monitor);
 		this.listener = new SocketListener(this);
 		listener.start();
+		FTPService.start();
+	}
+	
+	@Override
+	public void finalize() throws Throwable{
+		FTPService.stop();
+		super.finalize();
 	}
 
 	@Override

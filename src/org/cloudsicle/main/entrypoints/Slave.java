@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.cloudsicle.communication.FTPService;
 import org.cloudsicle.communication.IMessageHandler;
 import org.cloudsicle.communication.INeedOwnIP;
 import org.cloudsicle.communication.SocketListener;
@@ -40,6 +41,13 @@ public class Slave implements IMessageHandler{
 		deployExecutable();
 		listener = new SocketListener(this);
 		listener.start();
+		FTPService.start();
+	}
+	
+	@Override
+	public void finalize() throws Throwable{
+		FTPService.stop();
+		super.finalize();
 	}
 	
 	/**

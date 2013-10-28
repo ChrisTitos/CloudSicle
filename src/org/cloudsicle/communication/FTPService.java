@@ -12,12 +12,10 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.lang.instrument.Instrumentation;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
@@ -26,8 +24,6 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-
-import sun.instrument.InstrumentationImpl;
 
 /**
  * Convienience class for sharing files.
@@ -65,6 +61,45 @@ public class FTPService {
 	
 	public static void stop(){
 		downloadServer.quit();
+	}
+	
+	/**
+	 * Transform a list of fileids to a unique session
+	 * identifier for just these files.
+	 * 
+	 * @param files A list of file ids
+	 * @return A unique session id
+	 */
+	public static String sessionFromFiles(List<Integer> files){
+		String out = "";
+		for (Integer i : files)
+			out += "," + i;
+		return out;
+	}
+	
+	/**
+	 * Transform a mapping of fileids to file locations to a unique session
+	 * identifier for just these files.
+	 * 
+	 * @param mapping The file identifier to location mapping
+	 * @return A unique session id
+	 */
+	public static String sessionFromFiles(HashMap<Integer,String> mapping){
+		String out = "";
+		for (Integer i : mapping.keySet())
+			out += "," + i;
+		return out;
+	}
+	
+	/**
+	 * Block until our file is downloaded, utilized the default inferred session.
+	 * 
+	 * @param filemapping The mapping for fileids to actual files
+	 * @param timeout The timeout in milliseconds to wait for the file to start downloading
+	 * @return True if the file was transferred, False if a timeout occurred, the server has not started or the server has an error
+	 */
+	public static boolean offer(HashMap<Integer, String> filemapping, int timeout){
+		return offer(sessionFromFiles(filemapping), filemapping, timeout);
 	}
 	
 	/**

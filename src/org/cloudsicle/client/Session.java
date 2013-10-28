@@ -65,9 +65,11 @@ public class Session {
 			System.out.println("Sending MetaData to server");
 
 			sender.send(request);
-			FTPService.start();
-			FTPService.offer("test", this.files, 20000);
-			FTPService.stop();
+			
+			// TODO for each VM, offer only a subset of the filemapping
+			// A.K.A. make a map per VM
+			FTPService.offer(this.files, 20000);
+			
 			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
