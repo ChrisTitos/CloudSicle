@@ -58,11 +58,7 @@ public class ResourcePool {
 				System.out.println("VM " + slave.getId() + " "
 						+ slave.getVm().stateStr());
 				while (!slave.testConnection()) {
-					try {
-						Thread.sleep(2000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+					try {Thread.sleep(2000);} catch (InterruptedException e) {}
 				}
 				System.out.println("VM " + slave.getId()
 						+ " SSH connection established");
@@ -122,6 +118,10 @@ public class ResourcePool {
 	 */
 	public void releaseVM(SlaveVM vm) {
 		removeVM(vm);
+	}
+	
+	public synchronized int availableVMCount(){
+		return this.vmsAvailable.size();
 	}
 
 	/**

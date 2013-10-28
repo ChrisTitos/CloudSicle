@@ -14,6 +14,7 @@ public class Activity extends AbstractMessage implements INeedOwnIP {
 	private static final long serialVersionUID = 5915331727737049076L;
 	private ArrayList<IJob> jobs;
 	private InetAddress senderIp;
+	private InetAddress clientIp;
 	
 	public Activity(ArrayList<IJob> j){
 		jobs = j;
@@ -34,4 +35,11 @@ public class Activity extends AbstractMessage implements INeedOwnIP {
 		return this.senderIp;
 	}
 	
+	public InetAddress getClient(){
+		return this.clientIp;
+	}
+	
+	public void setClient(InetAddress client){
+		this.clientIp = client;
+	}
 }

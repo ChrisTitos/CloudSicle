@@ -16,11 +16,11 @@ public class GifsicleRunner {
 	 * Initialize the class, make sure that the executable exists
 	 */
 	public GifsicleRunner() throws MissingFileException{
-		File f = new File("~/gifsicle");
+		File f = new File("gifsicle");
 		if (!f.exists())
-			throw new MissingFileException("Could not find file ~/gifsicle");
+			throw new MissingFileException("Could not find file gifsicle");
 		if (!f.canExecute())
-			throw new MissingFileException("File ~/gifsicle has wrong permissions");
+			throw new MissingFileException("File gifsicle has wrong permissions");
 	}
 	
 	/**
@@ -41,7 +41,7 @@ public class GifsicleRunner {
 	 * Build the raw command to execute gifsicle
 	 */
 	private String buildCommand(String[] files, String output){
-		String result = "~/.gifsicle";
+		String result = "gifsicle";
 		result += " --delay=" + delay;
 		if (loop)
 			result += " --loop";
