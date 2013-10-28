@@ -97,13 +97,14 @@ public class Scheduler implements Runnable {
 			HashMap<Integer, String> files =  allocs.get(vm);
 			filelist.addAll(files.keySet());
 			DownloadJob d = new DownloadJob(filelist, meta.getSender());
-			//CombineJob c = new CombineJob(filelist);
-			//CompressJob comp = new CompressJob();
-			//ForwardJob f = new ForwardJob(true, meta.getSender());
+			CombineJob c = new CombineJob(filelist);
+			CompressJob comp = new CompressJob();
+			ForwardJob f = new ForwardJob(true);
+			f.setIP(meta.getSender());
 			list.add(d);
-			//list.add(c);
-			//list.add(comp);
-			//list.add(f);
+			list.add(c);
+			list.add(comp);
+			list.add(f);
 			
 			Activity activity = new Activity(list);
 

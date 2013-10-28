@@ -429,26 +429,4 @@ public class FTPService {
 			}
 		}
 	}
-	
-	/*
-	 * Quinten's tests
-	 */
-	/*
-	//Uploader
-	public static void main(String[] args){
-		FTPService.start();
-		HashMap<Integer, String> filemapping = new HashMap<Integer, String>();
-		filemapping.put(0, "/home/quinten/Mario.gif");
-		filemapping.put(1, "/home/quinten/Mario2.gif");
-		FTPService.offer("test", filemapping, 30000);
-		FTPService.stop();
-	}
-	//
-	//
-	//Downloader
-	public static void main(String[] args) throws UnknownHostException{
-		InetAddress localhost = InetAddress.getByName("192.168.178.21");
-		FTPService.downloadSock(localhost, "test", "in4392test" + File.separator);
-	}
-	*/
 }
