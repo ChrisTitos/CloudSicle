@@ -174,9 +174,11 @@ public class ResourcePool {
 	 */
 	public void exit() {
 		for (SlaveVM vm : vmsInUse)
-			removeVM(vm);
+			vm.hardExit();
 		for (SlaveVM vm : vmsAvailable)
-			removeVM(vm);
+			vm.hardExit();
+		vmsInUse.clear();
+		vmsAvailable.clear();
 	}
 
 	@Override

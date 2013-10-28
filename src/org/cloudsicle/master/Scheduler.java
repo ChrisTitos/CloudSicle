@@ -52,6 +52,10 @@ public class Scheduler implements Runnable {
 		SlaveVM vm = pool.getVMById(vmId);
 		pool.releaseVM(vm);
 	}
+	
+	public void hardExit(){
+		pool.exit();
+	}
 
 	@Override
 	public void run() {

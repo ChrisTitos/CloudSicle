@@ -12,3 +12,5 @@
 # Optionally you may specify "comport" and "ftpport"
 # as the port bindings for communication
 
+username=in439204
+password=Pkk6gE5g
