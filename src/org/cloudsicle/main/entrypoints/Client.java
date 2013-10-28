@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import org.cloudsicle.client.Session;
 import org.cloudsicle.client.gui.Frontend;
+import org.cloudsicle.communication.DefaultNetworkVariables;
 import org.cloudsicle.communication.FTPService;
 import org.cloudsicle.communication.IMessageHandler;
 import org.cloudsicle.communication.SocketListener;
@@ -14,7 +15,8 @@ public class Client implements IMessageHandler {
 
 	private SocketListener listener;
 
-	public static void main(String[] args) throws UnknownHostException {
+	public static void main(String[] args) throws IOException {
+		DefaultNetworkVariables.loadDAS4InfoFromConfig();
 		try {
 			Client client = new Client();
 		} catch (IOException e) {

@@ -93,8 +93,8 @@ public class SocketSender {
 
 		} else {
 			session = jsch
-					.getSession("in439204", receiver.getHostAddress(), 22);
-			session.setPassword("Pkk6gE5g");
+					.getSession(DefaultNetworkVariables.DAS4_USERNAME, receiver.getHostAddress(), 22);
+			session.setPassword(DefaultNetworkVariables.DAS4_PASSWORD);
 		}
 
 		session.setConfig("StrictHostKeyChecking", "no");

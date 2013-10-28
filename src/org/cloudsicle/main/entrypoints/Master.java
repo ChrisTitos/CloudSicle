@@ -1,5 +1,8 @@
 package org.cloudsicle.main.entrypoints;
 
+import java.io.IOException;
+
+import org.cloudsicle.communication.DefaultNetworkVariables;
 import org.cloudsicle.communication.FTPService;
 import org.cloudsicle.communication.IMessageHandler;
 import org.cloudsicle.communication.SocketListener;
@@ -43,8 +46,10 @@ public class Master implements IMessageHandler {
 
 	/**
 	 * @param args
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
+		DefaultNetworkVariables.loadDAS4InfoFromConfig();
 		try {
 			Master master = new Master();
 		} catch (Exception e) {

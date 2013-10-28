@@ -143,6 +143,7 @@ public class Frontend extends JFrame {
 		contentPane.add(lblMasterIp);
 		
 		textField = new JTextField();
+		textField.setText("130.161.7.3");
 		textField.addCaretListener(new CaretListener() {
 			public synchronized void caretUpdate(CaretEvent arg0) {
 				String ip = textField.getText();
@@ -175,7 +176,7 @@ public class Frontend extends JFrame {
 				}
 			}
 		});
-		textField.setBackground(Color.RED);
+		textField.setBackground(Color.GREEN);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, textField, 0, SpringLayout.SOUTH, lblMasterIp);
 		sl_contentPane.putConstraint(SpringLayout.WEST, textField, 20, SpringLayout.WEST, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.EAST, textField, -20, SpringLayout.EAST, contentPane);
