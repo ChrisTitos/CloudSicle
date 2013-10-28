@@ -70,7 +70,7 @@ public class Session {
 			System.out.println("Sending MetaData to server");
 			sender.send(request);
 
-			return FTPService.waitForOffer(this.files, 30000);
+			return FTPService.waitForOffer(this.files, 300000); //we might have to wait for a VM to start
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;

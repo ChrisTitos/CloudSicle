@@ -68,7 +68,6 @@ public class Scheduler implements Runnable {
 							+ metajob.getSender());
 
 					SlaveVM vm = this.pool.requestVM();
-					//while (this.pool.availableVMCount() < 1) {}
 						Allocation alloc = new Allocation();
 						alloc.allocate(vm, metajob.getFiles()); // for now just
 																// give
