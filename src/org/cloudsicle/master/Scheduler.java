@@ -5,9 +5,6 @@ import java.net.InetAddress;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-
-import org.cloudsicle.communication.DefaultNetworkVariables;
 import org.cloudsicle.communication.SocketSender;
 import org.cloudsicle.main.jobs.CombineJob;
 import org.cloudsicle.main.jobs.CompressJob;
