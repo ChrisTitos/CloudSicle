@@ -61,14 +61,15 @@ public class ResourcePool {
 					try {
 						Thread.sleep(2000);
 					} catch (InterruptedException e) {
-						e.printStackTrace();
 					}
 				}
 				System.out.println("VM " + slave.getId()
 						+ " SSH connection established");
 				if (slave.initialize()) {
 					vmsAvailable.add(slave);
-					System.out.println("VM " + slave.getId() + " now available. " + vmsAvailable.size() + " VMs in total");
+					System.out.println("VM " + slave.getId()
+							+ " now available. " + vmsAvailable.size()
+							+ " VMs in total");
 				}
 			}
 		};
@@ -101,17 +102,22 @@ public class ResourcePool {
 		if (vmsInUse.size() >= maxVMs)
 			return null;
 		if (vmsAvailable.size() > 0) {
-			SlaveVM vm = vmsAvailable.remove(0);
-			vmsInUse.add(vm);
-			return vm;
+			return getAvailableVM();
 		} else {
 			try {
 				addVM();
-				return null;
+				while (vmsAvailable.size() < 1) {} //wait for VM to 				
+				return getAvailableVM();
 			} catch (UninstantiableException e) {
 				return null;
 			}
 		}
+	}
+	
+	private SlaveVM getAvailableVM(){
+		SlaveVM vm = vmsAvailable.remove(0);
+		vmsInUse.add(vm);
+		return vm;
 	}
 
 	/**
@@ -122,6 +128,12 @@ public class ResourcePool {
 	 */
 	public void releaseVM(SlaveVM vm) {
 		removeVM(vm);
+	}
+
+	public int availableVMCount() {
+		synchronized (this.vmsAvailable) {
+			return this.vmsAvailable.size();
+		}
 	}
 
 	/**
@@ -135,9 +147,9 @@ public class ResourcePool {
 		vmsInUse.clear();
 		vmsAvailable.clear();
 	}
-	
+
 	@Override
-	public void finalize() throws Throwable{
+	public void finalize() throws Throwable {
 		exit();
 		super.finalize();
 	}

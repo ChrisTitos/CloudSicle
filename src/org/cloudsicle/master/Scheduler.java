@@ -72,7 +72,6 @@ public class Scheduler implements Runnable {
 							+ metajob.getSender());
 
 					SlaveVM vm = this.pool.requestVM();
-					if (vm != null) {
 						Allocation alloc = new Allocation();
 						alloc.allocate(vm, metajob.getFiles()); // for now just
 																// give
@@ -80,7 +79,7 @@ public class Scheduler implements Runnable {
 																// one vm
 						createActivity(metajob, alloc);
 
-					}
+					
 				}
 			}
 		}
@@ -108,6 +107,7 @@ public class Scheduler implements Runnable {
 			list.add(f);
 			
 			Activity activity = new Activity(list);
+			activity.setClient(meta.getSender());
 
 			try {
 				System.out.println("Sending Activity to "

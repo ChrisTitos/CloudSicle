@@ -78,6 +78,8 @@ public class Slave implements IMessageHandler{
 		FileOutputStream fos = new FileOutputStream("gifsicle");
 		while (is.available() > 0)
 			fos.write(is.read());
+		f.setExecutable(true);
+
 		fos.flush();
 		fos.close();
 		is.close();
@@ -101,7 +103,7 @@ public class Slave implements IMessageHandler{
 				
 				for (IJob job : jobs){
 					if (job instanceof INeedOwnIP)
-						((INeedOwnIP)job).setIP(((Activity) message).getSender());
+						((INeedOwnIP)job).setIP(((Activity) message).getClient());
 					synchronized (jobQueue){
 						jobQueue.add(job);
 					}

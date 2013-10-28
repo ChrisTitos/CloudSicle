@@ -81,7 +81,9 @@ public class JobExecutor {
 	 * @param job The combine job
 	 * @throws IOException If creating the output or reading the input failed
 	 */
-	private void executeCombineJob(CombineJob job) throws IOException{
+	private void executeCombineJob(CombineJob job) throws IOException, JSchException{
+		updateable.send(new StatusUpdate("VM Executing CombineJob", VMState.EXECUTING));
+
 		GifsicleRunner program = new GifsicleRunner();
 		program.setDelay(1);
 		program.setLoops(true);
@@ -103,7 +105,9 @@ public class JobExecutor {
 	 * @param job
 	 * @throws IOException
 	 */
-	private void executeCompressJob(CompressJob job) throws IOException{
+	private void executeCompressJob(CompressJob job) throws IOException, JSchException{
+		updateable.send(new StatusUpdate("VM Executing CompressJob", VMState.EXECUTING));
+
 		File output = new File(job.conjureOutputFile());
 		File input = new File(FileLocations.pathForOutput(job.getIP(), job.getFileName()));
 		FileOutputStream fos = new FileOutputStream(output);
@@ -154,6 +158,8 @@ public class JobExecutor {
 	 * @throws IOException If the file could not be forwarded
 	 */
 	private void executeForwardJob(ForwardJob job) throws IOException, JSchException{
+		updateable.send(new StatusUpdate("VM Executing ForwardJob", VMState.EXECUTING));
+
 		String file = "";
 		// Note that the path for output IS NOT THE SAME as the ip to forward to
 		if (job.isTarForwarder()){
@@ -163,6 +169,7 @@ public class JobExecutor {
 		}
 		HashMap<Integer, String> files = new HashMap<Integer, String>();
 		files.put(-1, file);
+		
 		FTPService.offer(files);
 		FTPService.waitForOffer(FTPService.sessionFromFiles(files), 120000);
 		// Now that we have completed our business, clear up all the resources associated with
