@@ -6,6 +6,7 @@ import org.cloudsicle.communication.DefaultNetworkVariables;
 import org.cloudsicle.communication.FTPService;
 import org.cloudsicle.communication.IMessageHandler;
 import org.cloudsicle.communication.SocketListener;
+import org.cloudsicle.main.VMState;
 import org.cloudsicle.master.Monitor;
 import org.cloudsicle.master.Scheduler;
 import org.cloudsicle.messages.IMessage;
@@ -45,8 +46,13 @@ public class Master implements IMessageHandler {
 			this.monitor.addjobWaiting(meta);
 			this.scheduler.schedule(meta);
 		} else if (message instanceof StatusUpdate) {
-			((StatusUpdate)message).getSender();
-			System.out.println(((StatusUpdate) message).getMessage());
+			StatusUpdate update = (StatusUpdate) message;
+			System.out.println((update).getMessage());
+			
+			if(update.getState() == VMState.DONE){
+				System.out.println(update.getVmId() + " saying he is done");
+				this.scheduler.vmIsDone(update.getVmId());
+			}
 		}
 	}
 

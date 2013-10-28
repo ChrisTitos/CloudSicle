@@ -13,17 +13,17 @@ public class Allocation extends AbstractMessage {
 	/**
 	 * A hashmap that maps the VM's to a list of files allocated for that VM
 	 */
-	private HashMap<InetAddress, HashMap<Integer, String>> allocations;
+	private HashMap<Integer, HashMap<Integer, String>> allocations;
 	
 	public Allocation(){
-		allocations = new HashMap<InetAddress, HashMap<Integer, String>>();
+		allocations = new HashMap<Integer, HashMap<Integer, String>>();
 	}
 	
 	public void allocate(SlaveVM vm, HashMap<Integer,String> list){
-		allocations.put(vm.getIp(), list);
+		allocations.put(vm.getId(), list);
 	}
 	
-	public HashMap<InetAddress, HashMap<Integer, String>> getAllocations(){
+	public HashMap<Integer, HashMap<Integer, String>> getAllocations(){
 		return this.allocations;
 	}
 

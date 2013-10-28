@@ -39,6 +39,8 @@ public class Slave implements IMessageHandler{
 	private FileOutputStream logSystemOut;
 	private FileOutputStream logSystemErr;
 	
+	private int id;
+	
 	/**
 	 * Initialize our Slave
 	 * 
@@ -89,7 +91,8 @@ public class Slave implements IMessageHandler{
 	public void process(IMessage message) {
 		if (message instanceof Activity){
 			try {
-				StatusUpdate status = new StatusUpdate("VM Received Activity", VMState.EXECUTING);
+				this.id = ((Activity) message).getVMId();
+				StatusUpdate status = new StatusUpdate("VM Received Activity", id, VMState.EXECUTING);
 				SocketSender sender = new SocketSender(false, ((Activity) message).getSender());		
 			
 				ArrayList<IJob> jobs = ((Activity) message).getJobs();
@@ -123,7 +126,7 @@ public class Slave implements IMessageHandler{
 			} else {
 				//We are not doing anything, exit now
 				try {
-					sender.send(new StatusUpdate("VM Shutting down on soft exit request.", VMState.SHUTDOWN));
+					sender.send(new StatusUpdate("VM Shutting down on soft exit request.", id, VMState.SHUTDOWN));
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (JSchException e) {
@@ -179,7 +182,7 @@ public class Slave implements IMessageHandler{
 			//Our consumer Thread will stop either way
 			if (callExit){
 				try {
-					updateable.send(new StatusUpdate("VM Shutting down on soft exit request.", VMState.SHUTDOWN));
+					updateable.send(new StatusUpdate("VM Shutting down on soft exit request.", id, VMState.SHUTDOWN));
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (JSchException e) {
@@ -188,7 +191,7 @@ public class Slave implements IMessageHandler{
 				System.exit(0);
 			} else {
 				try {
-					updateable.send(new StatusUpdate("VM Done processing all jobs.", VMState.DONE));
+					updateable.send(new StatusUpdate("VM Done processing all jobs.", id, VMState.DONE));
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (JSchException e) {
@@ -198,7 +201,7 @@ public class Slave implements IMessageHandler{
 		}
 		
 		public void executeJob(IJob job){
-			JobExecutor executor = new JobExecutor(job, updateable);
+			JobExecutor executor = new JobExecutor(job, updateable, id);
 			try {
 				executor.run();
 			} catch (UnknownJobException e) {

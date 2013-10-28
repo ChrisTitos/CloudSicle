@@ -48,7 +48,8 @@ public class Scheduler implements Runnable {
 		this.metaJobQueue.push(metajob);
 	}
 	
-	public void vmFinished(SlaveVM vm){
+	public void vmIsDone(int vmId){
+		SlaveVM vm = pool.getVMById(vmId);
 		pool.releaseVM(vm);
 	}
 
@@ -84,13 +85,15 @@ public class Scheduler implements Runnable {
 	private void createActivity(JobMetaData meta, Allocation alloc) {
 
 		ArrayList<IJob> list = new ArrayList<IJob>();
-		HashMap<InetAddress, HashMap<Integer, String>> allocs = alloc.getAllocations();
+		HashMap<Integer, HashMap<Integer, String>> allocs = alloc.getAllocations();
 
-		for (InetAddress vm : allocs.keySet()) {
-			SocketSender sender = new SocketSender(true, vm);
+		for (Integer vmId : allocs.keySet()) {
+			SlaveVM vm = this.pool.getVMById(vmId);
+			
+			SocketSender sender = new SocketSender(true, vm.getIp());
 
 			ArrayList<Integer> filelist = new ArrayList<Integer>();
-			HashMap<Integer, String> files =  allocs.get(vm);
+			HashMap<Integer, String> files =  allocs.get(vm.getId());
 			filelist.addAll(files.keySet());
 			DownloadJob d = new DownloadJob(filelist, meta.getSender());
 			CombineJob c = new CombineJob(filelist);
@@ -98,16 +101,17 @@ public class Scheduler implements Runnable {
 			ForwardJob f = new ForwardJob(true);
 			f.setIP(meta.getSender());
 			list.add(d);
-			list.add(c);
-			list.add(comp);
-			list.add(f);
+			//list.add(c);
+			//list.add(comp);
+			//oklist.add(f);
 			
 			Activity activity = new Activity(list);
 			activity.setClient(meta.getSender());
+			activity.setVM(vm);
 
 			try {
 				System.out.println("Sending Activity to "
-						+ vm.getHostAddress());
+						+ vm.getId() + "@" + vm.getIp().getHostAddress());
 				sender.send(activity, true);
 			} catch (IOException e) {
 				e.printStackTrace();

@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.cloudsicle.communication.SocketSender;
+import org.cloudsicle.main.VMState;
 import org.opennebula.client.Client;
 import org.opennebula.client.OneResponse;
 import org.opennebula.client.vm.VirtualMachine;
@@ -26,6 +27,7 @@ public class SlaveVM {
 	private Client client;
 	private VirtualMachine vm;
 	private InetAddress ip;
+	private VMState state;
 	
 	private boolean inUse = false;
 	
@@ -129,18 +131,7 @@ public class SlaveVM {
 		vm.delete();
 	}
 	
-	/**
-	 * Create the ssh command to launch the remote jar on the slave
-	 */
-	private String buildCommand(){
-		return "ssh root@"
-				+ ip
-				+ " \"cat > slave.jar\" < slave.jar";
-				//+ ";ssh root@"
-				//+ ip
-				//+" \"java -jar slave.jar\"";
-	}
-	
+		
 	/**
 	 * Start the remote jar file
 	 * 
@@ -194,6 +185,14 @@ public class SlaveVM {
 			return false;
 		}
 
+	}
+	
+	public void setState(VMState state){
+		this.state = state;
+	}
+	
+	public VMState getState(){
+		return this.state;
 	}
 	
 }

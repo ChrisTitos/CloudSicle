@@ -3,9 +3,7 @@ package org.cloudsicle.main.jobs;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.InetAddress;
 
-import org.cloudsicle.communication.INeedOwnIP;
 import org.cloudsicle.slave.FileLocations;
 
 public class CompressJob extends AbstractJob implements Serializable {

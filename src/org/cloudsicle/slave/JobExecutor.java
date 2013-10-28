@@ -30,12 +30,17 @@ public class JobExecutor {
 	private final IJob job;
 	private final JobType type;
 	private SocketSender updateable;
+	/**
+	 * The id of this virtual machine
+	 */
+	private int id;
 	
 	private static ConcurrentHashMap<InetAddress, HashMap<Integer, String>> fileSystem = new ConcurrentHashMap<InetAddress, HashMap<Integer, String>>();
 	
-	public JobExecutor(IJob job, SocketSender updater){
+	public JobExecutor(IJob job, SocketSender updater, int id){
 		this.updateable = updater;
 		this.job = job;
+		this.id = id;
 		if (job instanceof CombineJob)
 			type = JobType.COMBINE;
 		else if (job instanceof CompressJob)
@@ -82,7 +87,7 @@ public class JobExecutor {
 	 * @throws IOException If creating the output or reading the input failed
 	 */
 	private void executeCombineJob(CombineJob job) throws IOException, JSchException{
-		updateable.send(new StatusUpdate("VM Executing CombineJob", VMState.EXECUTING));
+		updateable.send(new StatusUpdate("VM Executing CombineJob", id, VMState.EXECUTING));
 
 		GifsicleRunner program = new GifsicleRunner();
 		program.setDelay(1);
@@ -106,7 +111,7 @@ public class JobExecutor {
 	 * @throws IOException
 	 */
 	private void executeCompressJob(CompressJob job) throws IOException, JSchException{
-		updateable.send(new StatusUpdate("VM Executing CompressJob", VMState.EXECUTING));
+		updateable.send(new StatusUpdate("VM Executing CompressJob", id, VMState.EXECUTING));
 
 		File output = new File(job.conjureOutputFile());
 		File input = new File(FileLocations.pathForOutput(job.getIP(), job.getFileName()));
@@ -134,7 +139,7 @@ public class JobExecutor {
 	 * @throws IOException If the file could not be downloaded
 	 */
 	private void executeDownloadJob(DownloadJob job) throws IOException, JSchException{
-		updateable.send(new StatusUpdate("VM Executing DownloadJob", VMState.EXECUTING));
+		updateable.send(new StatusUpdate("VM Executing DownloadJob", id, VMState.EXECUTING));
 
 		boolean success = FTPService.downloadSock(job.getUploaderIP(), job.getSession(), FileLocations.folderForIp(job.getUploaderIP()));
 		synchronized (fileSystem){
@@ -146,7 +151,7 @@ public class JobExecutor {
 				fileMapping.put(i, FileLocations.pathForFileid(job.getUploaderIP(), i));
 		}
 		
-		updateable.send(new StatusUpdate("VM DownloadJob result: " + success, VMState.EXECUTING));
+		updateable.send(new StatusUpdate("VM DownloadJob result: " + success, id, VMState.EXECUTING));
 
 	}
 	
@@ -158,7 +163,7 @@ public class JobExecutor {
 	 * @throws IOException If the file could not be forwarded
 	 */
 	private void executeForwardJob(ForwardJob job) throws IOException, JSchException{
-		updateable.send(new StatusUpdate("VM Executing ForwardJob", VMState.EXECUTING));
+		updateable.send(new StatusUpdate("VM Executing ForwardJob", id, VMState.EXECUTING));
 
 		String file = "";
 		// Note that the path for output IS NOT THE SAME as the ip to forward to
@@ -183,7 +188,6 @@ public class JobExecutor {
 		}
 		for (String path : fileMapping.values())
 			new File(path).delete();
-		updateable.send(new StatusUpdate("VM Done processing all jobs.", VMState.DONE)); //we are done
 	}
 	
 	private enum JobType{

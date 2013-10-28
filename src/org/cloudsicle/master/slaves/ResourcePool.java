@@ -1,6 +1,10 @@
 package org.cloudsicle.master.slaves;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.cloudsicle.main.VMState;
 import org.opennebula.client.Client;
 import org.opennebula.client.ClientConfigurationException;
 
@@ -14,6 +18,7 @@ public class ResourcePool {
 
 	private ArrayList<SlaveVM> vmsInUse = new ArrayList<SlaveVM>();
 	private ArrayList<SlaveVM> vmsAvailable = new ArrayList<SlaveVM>();
+	private HashMap<Integer, SlaveVM> allVms = new HashMap<Integer, SlaveVM>();
 
 	/**
 	 * Initialize the new Resource Pool Defaults to a maximum of 20 VMs.
@@ -39,6 +44,10 @@ public class ResourcePool {
 		this.openNebula = new Client();
 		this.maxVMs = maxvms;
 	}
+	
+	public SlaveVM getVMById(int id){
+		return this.allVms.get(id);
+	}
 
 	/**
 	 * Adds a virtual machine to our pool. It creates a thread that will wait
@@ -50,6 +59,9 @@ public class ResourcePool {
 	private void addVM() {
 		final SlaveVM slave = new SlaveVM(openNebula);
 		slave.createVM();
+		slave.setState(VMState.INIT);
+		allVms.put(slave.getId(), slave);
+
 		Thread creator = new Thread() {
 			public void run() {
 				while (!slave.getVm().lcmStateStr().equals("RUNNING")) {
@@ -65,11 +77,14 @@ public class ResourcePool {
 				}
 				System.out.println("VM " + slave.getId()
 						+ " SSH connection established");
+
 				if (slave.initialize()) {
 					vmsAvailable.add(slave);
 					System.out.println("VM " + slave.getId()
 							+ " now available. " + vmsAvailable.size()
 							+ " VMs in total");
+					System.out.println("keyset: " + allVms.keySet());
+
 				}
 			}
 		};
@@ -85,10 +100,14 @@ public class ResourcePool {
 	 *             If we could not reach the VM to tell them to shut down
 	 */
 	private void removeVM(SlaveVM vm) throws UnreachableVMException {
+		System.out.println("DEBUG: VM " + vm.getId() + " is deleted");
+
+		this.allVms.remove(vm.getId());
 		if (vmsInUse.contains(vm))
 			vmsInUse.remove(vm);
 		if (vmsAvailable.contains(vm))
 			vmsAvailable.remove(vm);
+		
 		vm.hardExit();
 	}
 
@@ -122,12 +141,26 @@ public class ResourcePool {
 
 	/**
 	 * Signal a Slave VM is no longer used
+	 * It will be removed from the resource pool after a certain timeout
 	 * 
-	 * @param vm
-	 *            The VM to release.
+	 * @param vm The VM to release.
 	 */
 	public void releaseVM(SlaveVM vm) {
-		removeVM(vm);
+		System.out.println("DEBUG: VM " + vm.getId() + " is available again");
+		this.vmsInUse.remove(vm);
+		this.vmsAvailable.add(vm);
+		
+		final int id = vm.getId();
+		
+		
+		Thread timeout = new Thread(){
+			public void run(){
+				try {Thread.sleep(3000);} catch (InterruptedException e) {}
+				
+				removeVM(allVms.get(id));
+			}
+		};
+		timeout.start();
 	}
 
 	public int availableVMCount() {
