@@ -1,7 +1,5 @@
 package org.cloudsicle.main.entrypoints;
 
-import java.io.IOException;
-
 import org.cloudsicle.communication.DefaultNetworkVariables;
 import org.cloudsicle.communication.FTPService;
 import org.cloudsicle.communication.IMessageHandler;
@@ -28,6 +26,7 @@ public class Master implements IMessageHandler {
 	
 	@Override
 	public void finalize() throws Throwable{
+		scheduler.hardExit();
 		FTPService.stop();
 		super.finalize();
 	}
@@ -46,15 +45,19 @@ public class Master implements IMessageHandler {
 
 	/**
 	 * @param args
-	 * @throws IOException 
+	 * @throws Throwable 
 	 */
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Throwable {
 		DefaultNetworkVariables.loadDAS4InfoFromConfig();
+		Master master = null;
 		try {
-			Master master = new Master();
+			master = new Master();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.in.read();
+		master.finalize();
+		System.exit(0);
 	}
 
 }
