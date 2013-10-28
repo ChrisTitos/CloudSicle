@@ -68,7 +68,7 @@ public class Scheduler implements Runnable {
 				if (!this.metaJobQueue.isEmpty()) {
 					JobMetaData metajob = this.metaJobQueue.pop();
 					System.out.println("DEBUG: Sheduling job of "
-							+ metajob.getIP());
+							+ metajob.getSender());
 
 					SlaveVM vm = this.pool.requestVM();
 					if (vm != null) {
@@ -77,7 +77,7 @@ public class Scheduler implements Runnable {
 																// give
 																// everything to
 																// one vm
-						createActivity(alloc, metajob.getIP());
+						createActivity(metajob, alloc);
 
 					}
 				}
@@ -85,29 +85,25 @@ public class Scheduler implements Runnable {
 		}
 	}
 	
-	private void createActivity(Allocation alloc, InetAddress client) {
+	private void createActivity(JobMetaData meta, Allocation alloc) {
 
 		ArrayList<IJob> list = new ArrayList<IJob>();
-		HashMap<InetAddress, List<String>> allocs = alloc.getAllocations();
+		HashMap<InetAddress, HashMap<Integer, String>> allocs = alloc.getAllocations();
 
 		for (InetAddress vm : allocs.keySet()) {
 			SocketSender sender = new SocketSender(true, vm);
 
-			ArrayList<String> files = (ArrayList<String>) allocs.get(vm);
-			int[] filelist = new int[files.size()];
-			for (String filename : files) {
-				DownloadJob d = new DownloadJob(
-						DefaultNetworkVariables.DEFAULT_FTP_PORT,
-						filename.hashCode());
-				list.add(d);
-				filelist[files.indexOf(filename)] = filename.hashCode();
-			}
-			CombineJob c = new CombineJob(filelist);
-			CompressJob comp = new CompressJob();
-			ForwardJob f = new ForwardJob(true, client);
-			list.add(c);
-			list.add(comp);
-			list.add(f);
+			ArrayList<Integer> filelist = new ArrayList<Integer>();
+			HashMap<Integer, String> files =  allocs.get(vm);
+			filelist.addAll(files.keySet());
+			DownloadJob d = new DownloadJob("test", filelist, meta.getSender());
+			//CombineJob c = new CombineJob(filelist);
+			//CompressJob comp = new CompressJob();
+			//ForwardJob f = new ForwardJob(true, meta.getSender());
+			list.add(d);
+			//list.add(c);
+			//list.add(comp);
+			//list.add(f);
 			
 			Activity activity = new Activity(list);
 

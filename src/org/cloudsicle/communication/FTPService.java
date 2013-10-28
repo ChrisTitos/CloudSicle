@@ -243,10 +243,14 @@ public class FTPService {
 		}
 	}
 	
-	private static class OfferingThread extends Thread{
+	private static class OfferingThread implements Runnable{
 		
 		private boolean alive = true;
 		private boolean error = false;
+		
+		public void start(){
+			new Thread(this).start();
+		}
 		
 		public void quit(){
 			alive = false;

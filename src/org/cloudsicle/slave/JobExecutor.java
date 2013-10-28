@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.cloudsicle.communication.FTPService;
 import org.cloudsicle.communication.SocketSender;
 import org.cloudsicle.main.VMState;
 import org.cloudsicle.main.jobs.CombineJob;
@@ -127,15 +128,19 @@ public class JobExecutor {
 	 * @throws IOException If the file could not be downloaded
 	 */
 	private void executeDownloadJob(DownloadJob job) throws IOException, JSchException{
-		String file = job.download();
-		synchronized (fileSystem){
-			if (!fileSystem.containsKey(job.getIP())){
-				fileSystem.put(job.getIP(), new ConcurrentHashMap<Integer, String>());
-			}
-			ConcurrentHashMap<Integer, String> fileMapping = fileSystem.get(job.getIP());
-			fileMapping.put(job.getFileID(), file);
-		}
 		updateable.send(new StatusUpdate("VM Executing DownloadJob", VMState.EXECUTING));
+
+		boolean success = FTPService.downloadSock(job.getUploaderIP(), job.getSession(), "test" + File.separator);
+		synchronized (fileSystem){
+			if (!fileSystem.containsKey(job.getUploaderIP())){
+				fileSystem.put(job.getUploaderIP(), new ConcurrentHashMap<Integer, String>());
+			}
+			ConcurrentHashMap<Integer, String> fileMapping = fileSystem.get(job.getUploaderIP());
+			//fileMapping.put(job.getFileID(), file);
+			
+		}
+		updateable.send(new StatusUpdate("VM DownloadJob result: " + success, VMState.EXECUTING));
+
 	}
 	
 	/**

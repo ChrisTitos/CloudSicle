@@ -1,6 +1,7 @@
 package org.cloudsicle.messages;
 
 import java.net.InetAddress;
+import java.util.HashMap;
 import java.util.List;
 
 import org.cloudsicle.communication.INeedOwnIP;
@@ -16,7 +17,7 @@ public class JobMetaData extends AbstractMessage implements INeedOwnIP {
 	private InetAddress client;
 
 	private int totalFileSize;
-	private List<String> files;
+	private HashMap<Integer, String> files;
 	
 	private long starttime;
 	private long endtime;
@@ -34,15 +35,15 @@ public class JobMetaData extends AbstractMessage implements INeedOwnIP {
 		return this.files.size();
 	}
 	
-	public List<String> getFiles(){
+	public HashMap<Integer, String> getFiles(){
 		return this.files;
 	}
 	
 	/**
-	 * Pass a List of <i>filenames</i>, <b>not actual files!</b>
+	 * Pass a HashMap of file id's to file names.
 	 * @param files
 	 */
-	public void setFiles(List<String> files){
+	public void setFiles(HashMap<Integer, String> files){
 		this.files = files;
 	}
 

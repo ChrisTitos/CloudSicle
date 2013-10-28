@@ -89,13 +89,14 @@ public class SocketSender {
 		Session session;
 		if (toVM) {
 			session = jsch.getSession("root", receiver.getHostAddress(), 22);
+			jsch.addIdentity("~/.ssh/id_dsa");
+
 		} else {
 			session = jsch
 					.getSession("in439204", receiver.getHostAddress(), 22);
 			session.setPassword("Pkk6gE5g");
 		}
 
-		jsch.addIdentity("~/.ssh/id_dsa");
 		session.setConfig("StrictHostKeyChecking", "no");
 		session.connect();
 

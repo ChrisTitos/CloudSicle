@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.List;
 
+import org.cloudsicle.communication.FTPService;
 import org.cloudsicle.communication.SocketSender;
 import org.cloudsicle.messages.JobMetaData;
 
@@ -55,7 +56,7 @@ public class Session {
 		
 		JobMetaData request = new JobMetaData();
 		
-		request.setFiles(files);
+		request.setFiles(this.files);
 		request.setTotalFileSize(totalFileSize(files));
 		request.setStarttime(System.currentTimeMillis());
 		
@@ -64,6 +65,9 @@ public class Session {
 			System.out.println("Sending MetaData to server");
 
 			sender.send(request);
+			FTPService.start();
+			FTPService.offer("test", this.files, 20000);
+			FTPService.stop();
 			return true;
 		} catch (IOException e) {
 			e.printStackTrace();

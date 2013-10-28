@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.util.ArrayList;
 
 import org.cloudsicle.communication.INeedOwnIP;
 import org.cloudsicle.slave.FileLocations;
@@ -11,7 +12,7 @@ import org.cloudsicle.slave.FileLocations;
 public class CombineJob implements IJob, INeedOwnIP, Serializable {
 
 	private static final long serialVersionUID = -855918850745018227L;
-	private final int[] files;
+	private final ArrayList<Integer> files;
 	private final String name;
 	private InetAddress ip;
 	
@@ -20,7 +21,7 @@ public class CombineJob implements IJob, INeedOwnIP, Serializable {
 	 * 
 	 * @param files The file identifiers to combine into one gif
 	 */
-	public CombineJob(int[] files){
+	public CombineJob(ArrayList<Integer> files){
 		this.files = files;
 		this.name = "output";
 	}
@@ -32,12 +33,12 @@ public class CombineJob implements IJob, INeedOwnIP, Serializable {
 	 * @param files The file identifiers to combine into one gif
 	 * @param name The output name
 	 */
-	public CombineJob(int[] files, String name){
+	public CombineJob(ArrayList<Integer> files, String name){
 		this.files = files;
 		this.name = name;
 	}
 	
-	public int[] getFiles(){
+	public ArrayList<Integer> getFiles(){
 		return files;
 	}
 	
