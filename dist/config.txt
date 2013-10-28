@@ -1,0 +1,11 @@
+#
+# DAS4 Log-in credentials
+#
+# Format:
+#  username=<yourusername>
+#  password=<yourpassword>
+#
+# Example:
+#  username=bob
+#  password=3uper3ecretpa33word
+
