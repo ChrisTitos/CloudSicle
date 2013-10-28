@@ -62,15 +62,15 @@ public class Session {
 		
 		try {
 			SocketSender sender = new SocketSender(true, server);
-			System.out.println("Sending MetaData to server");
-
-			sender.send(request);
 			
 			// TODO for each VM, offer only a subset of the filemapping
 			// A.K.A. make a map per VM
-			FTPService.offer(this.files, 20000);
+			FTPService.offer(this.files);
 			
-			return true;
+			System.out.println("Sending MetaData to server");
+			sender.send(request);
+
+			return FTPService.waitForOffer(this.files, 30000);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;

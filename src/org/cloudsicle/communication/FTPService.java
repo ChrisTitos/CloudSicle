@@ -92,31 +92,54 @@ public class FTPService {
 	}
 	
 	/**
-	 * Block until our file is downloaded, utilized the default inferred session.
+	 * Put some files up for download, utilizing the default inferred session.
 	 * 
 	 * @param filemapping The mapping for fileids to actual files
 	 * @param timeout The timeout in milliseconds to wait for the file to start downloading
 	 * @return True if the file was transferred, False if a timeout occurred, the server has not started or the server has an error
 	 */
-	public static boolean offer(HashMap<Integer, String> filemapping, int timeout){
-		return offer(sessionFromFiles(filemapping), filemapping, timeout);
+	public static boolean offer(HashMap<Integer, String> filemapping){
+		return offer(sessionFromFiles(filemapping), filemapping);
 	}
 	
 	/**
-	 * Block until our file is downloaded
+	 * Put some files up for download.
 	 * 
 	 * @param descriptor The session descriptor
 	 * @param filemapping The mapping for fileids to actual files
-	 * @param timeout The timeout in milliseconds to wait for the file to start downloading
-	 * @return True if the file was transferred, False if a timeout occurred, the server has not started or the server has an error
+	 * @return True if the file was transferred, False if the server has not started or the server has an error
 	 */
-	public static boolean offer(String descriptor, HashMap<Integer, String> filemapping, int timeout){
+	public static boolean offer(String descriptor, HashMap<Integer, String> filemapping){
 		if (downloadServer.hasError() || !downloadServer.hasStarted())
 			return false;
 		//Offer the download
+		System.out.println("DEBUG: Offering session (\"" + descriptor + "\") for download.");
 		synchronized (openDownloadables){
 			openDownloadables.put(descriptor, filemapping);
 		}
+		return true;
+	}
+	
+	/**
+	 * Block until some session has been completed, or the timeout occurred,
+	 * utilizing the default inferred session.
+	 * 
+	 * @param descriptor  The session descriptor
+	 * @param timeout The timeout in milliseconds to wait for the file to start downloading
+	 * @return True if the file was transferred, False if a timeout occurred
+	 */
+	public static boolean waitForOffer(HashMap<Integer, String> filemapping, int timeout){
+		return waitForOffer(sessionFromFiles(filemapping), timeout);
+	}
+	
+	/**
+	 * Block until some session has been completed, or the timeout occurred.
+	 * 
+	 * @param descriptor  The session descriptor
+	 * @param timeout The timeout in milliseconds to wait for the file to start downloading
+	 * @return True if the file was transferred, False if a timeout occurred
+	 */
+	public static boolean waitForOffer(String descriptor, int timeout){
 		//Wait until our file is done or the timeout has expired
 		long startTime = System.currentTimeMillis();
 		while (System.currentTimeMillis() < startTime + timeout){
@@ -128,6 +151,9 @@ public class FTPService {
 			if (downloaded)
 				return true;
 			try { Thread.sleep(10); } catch (InterruptedException e) {}
+		}
+		synchronized (openDownloadables){
+			openDownloadables.remove(descriptor);
 		}
 		return false;
 	}
@@ -148,6 +174,7 @@ public class FTPService {
 			s.close();
 			return success;
 		} catch (IOException e) {
+			e.printStackTrace();
 			return false;
 		}
 	}
@@ -206,6 +233,13 @@ public class FTPService {
 		}
 	}
 	
+	private static synchronized void assertFolder(String path){
+		File dir = new File(path);
+		if (!dir.exists()){
+			dir.mkdirs();
+		}
+	}
+	
 	/**
 	 * Download a file from a certain peer.
 	 * 
@@ -215,6 +249,7 @@ public class FTPService {
 	 */
 	private static boolean download(InputStream inStream, OutputStream outStream, String session, String outputFolder){
 		try{
+			assertFolder(outputFolder);
 			//Write our session identifier
 			System.out.println("DEBUG: Attempting to download session \"" + session + "\"");
 			ObjectOutputStream oos = new ObjectOutputStream(outStream);
@@ -334,7 +369,7 @@ public class FTPService {
 						}
 						if (!knownsession){
 							//If an unknown session is being requested send a 0 (false)
-							System.out.println("DEBUG: Unknown download session requested, exiting");
+							System.out.println("DEBUG: Unknown download session requested (\""+session+"\"), exiting");
 							os.write(0);
 							os.flush();
 							s.close();

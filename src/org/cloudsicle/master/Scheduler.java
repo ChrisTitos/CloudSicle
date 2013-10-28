@@ -96,7 +96,7 @@ public class Scheduler implements Runnable {
 			ArrayList<Integer> filelist = new ArrayList<Integer>();
 			HashMap<Integer, String> files =  allocs.get(vm);
 			filelist.addAll(files.keySet());
-			DownloadJob d = new DownloadJob("test", filelist, meta.getSender());
+			DownloadJob d = new DownloadJob(filelist, meta.getSender());
 			//CombineJob c = new CombineJob(filelist);
 			//CompressJob comp = new CompressJob();
 			//ForwardJob f = new ForwardJob(true, meta.getSender());

@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.ArrayList;
 
+import org.cloudsicle.communication.FTPService;
+
 public class DownloadJob implements IJob, Serializable {
 	
 	private static final long serialVersionUID = -8173332718020415882L;
@@ -12,8 +14,8 @@ public class DownloadJob implements IJob, Serializable {
 	private ArrayList<Integer> fileIds;
 	private InetAddress uploaderIP;
 	
-	public DownloadJob(String session, ArrayList<Integer> files, InetAddress uploader){
-		this.uploaderSession = session;
+	public DownloadJob(ArrayList<Integer> files, InetAddress uploader){
+		this.uploaderSession = FTPService.sessionFromFiles(files);
 		this.fileIds = files;
 		this.uploaderIP = uploader;
 		

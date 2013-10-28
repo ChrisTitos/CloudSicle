@@ -189,11 +189,13 @@ public class Frontend extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.EAST, panel, 0, SpringLayout.EAST, contentPane);
 		contentPane.add(panel);
 		
-		JButton btnPerformCloudsicling = new JButton("Perform CloudSicling");
+		final JButton btnPerformCloudsicling = new JButton("Perform CloudSicling");
 		btnPerformCloudsicling.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
+				btnPerformCloudsicling.setEnabled(false);
 				if (session == null){
+					btnPerformCloudsicling.setEnabled(true);
 					JOptionPane.showMessageDialog(null, "Could not submit the job because there is no valid session.", "Woops..", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
@@ -208,12 +210,14 @@ public class Frontend extends JFrame {
 				try {
 					ia = InetAddress.getByName(textField.getText());
 				} catch (UnknownHostException e1) {
+					btnPerformCloudsicling.setEnabled(true);
 					JOptionPane.showMessageDialog(null, "Could not submit the job because the master IP could not be read.", "Woops..", JOptionPane.ERROR_MESSAGE); 
 					return;
 				}
 
 				if (!session.requestCloudSicle(files, ia))
 					JOptionPane.showMessageDialog(null, "Failed to submit job, could not connect to server.", "Woops..", JOptionPane.ERROR_MESSAGE);
+				btnPerformCloudsicling.setEnabled(true);
 			}
 		});
 		panel.add(btnPerformCloudsicling);

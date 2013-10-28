@@ -133,4 +133,10 @@ public class ResourcePool {
 		for (SlaveVM vm : vmsAvailable)
 			removeVM(vm);
 	}
+	
+	@Override
+	public void finalize() throws Throwable{
+		exit();
+		super.finalize();
+	}
 }
