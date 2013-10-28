@@ -132,7 +132,7 @@ public class JobExecutor {
 	private void executeDownloadJob(DownloadJob job) throws IOException, JSchException{
 		updateable.send(new StatusUpdate("VM Executing DownloadJob", VMState.EXECUTING));
 
-		boolean success = FTPService.downloadSock(job.getUploaderIP(), job.getSession(), "test" + File.separator);
+		boolean success = FTPService.downloadSock(job.getUploaderIP(), job.getSession(), FileLocations.folderForIp(job.getUploaderIP()));
 		synchronized (fileSystem){
 			if (!fileSystem.containsKey(job.getUploaderIP())){
 				fileSystem.put(job.getUploaderIP(), new HashMap<Integer, String>());
