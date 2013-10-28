@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -32,12 +33,24 @@ public class Slave implements IMessageHandler{
 	private List<IJob> jobQueue = Collections.synchronizedList(new LinkedList<IJob>()); 
 	private JobExecutionThread thread = null;
 	
+	private PrintStream oldSystemOut;
+	private PrintStream oldSystemErr;
+	private FileOutputStream logSystemOut;
+	private FileOutputStream logSystemErr;
+	
 	/**
 	 * Initialize our Slave
 	 * 
 	 * @throws IOException If we failed to deploy gifsicle on the environment
 	 */
 	public Slave() throws IOException{
+		logSystemOut = new FileOutputStream("out.txt");
+		logSystemErr = new FileOutputStream("err.txt");
+		oldSystemOut = System.out;
+		oldSystemErr = System.err;
+		System.setOut(new PrintStream(logSystemOut));
+		System.setErr(new PrintStream(logSystemErr));
+		
 		deployExecutable();
 		listener = new SocketListener(this);
 		listener.start();
@@ -46,6 +59,10 @@ public class Slave implements IMessageHandler{
 	
 	@Override
 	public void finalize() throws Throwable{
+		System.setOut(oldSystemOut);
+		System.setErr(oldSystemErr);
+		logSystemOut.close();
+		logSystemErr.close();
 		FTPService.stop();
 		super.finalize();
 	}
