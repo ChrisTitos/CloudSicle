@@ -42,6 +42,8 @@ public class SlaveVM {
 	public void createVM(){
 		ClassLoader cl = SlaveVM.class.getClassLoader();
 		String vmTemplate = new Scanner(cl.getResourceAsStream("centos-smallnet-qcow2.one")).useDelimiter("\\A").next();
+		vmTemplate = vmTemplate.replace("$USER", System.getenv("USER"));
+		System.out.println(vmTemplate);
 		OneResponse rc = VirtualMachine.allocate(client, vmTemplate);
 		
 		if (rc.isError())
