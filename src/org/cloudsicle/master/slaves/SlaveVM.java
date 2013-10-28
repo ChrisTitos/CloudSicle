@@ -149,6 +149,7 @@ public class SlaveVM {
 		System.out.println("DEBUG: Deploying slave.jar to VM " + ip);
 		SocketSender sender = new SocketSender(false, ip);
 		sender.sendFile("slave.jar");
+		sender.sendFile("config.txt");
 		
 		JSch jsch = new JSch();
 		

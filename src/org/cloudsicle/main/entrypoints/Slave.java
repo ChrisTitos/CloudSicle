@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.cloudsicle.communication.DefaultNetworkVariables;
 import org.cloudsicle.communication.FTPService;
 import org.cloudsicle.communication.IMessageHandler;
 import org.cloudsicle.communication.INeedOwnIP;
@@ -136,6 +137,7 @@ public class Slave implements IMessageHandler{
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
+		DefaultNetworkVariables.loadDAS4InfoFromConfig();
 		@SuppressWarnings("unused")
 		Slave slave = new Slave();
 	}
