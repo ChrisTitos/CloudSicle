@@ -8,6 +8,7 @@ import java.io.PrintStream;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.cloudsicle.communication.FTPService;
@@ -30,7 +31,7 @@ public class JobExecutor {
 	private final JobType type;
 	private SocketSender updateable;
 	
-	private static ConcurrentHashMap<InetAddress, ConcurrentHashMap<Integer, String>> fileSystem = new ConcurrentHashMap<InetAddress, ConcurrentHashMap<Integer, String>>();
+	private static ConcurrentHashMap<InetAddress, HashMap<Integer, String>> fileSystem = new ConcurrentHashMap<InetAddress, HashMap<Integer, String>>();
 	
 	public JobExecutor(IJob job, SocketSender updater){
 		this.updateable = updater;
@@ -134,11 +135,11 @@ public class JobExecutor {
 		boolean success = FTPService.downloadSock(job.getUploaderIP(), job.getSession(), "test" + File.separator);
 		synchronized (fileSystem){
 			if (!fileSystem.containsKey(job.getUploaderIP())){
-				fileSystem.put(job.getUploaderIP(), new ConcurrentHashMap<Integer, String>());
+				fileSystem.put(job.getUploaderIP(), new HashMap<Integer, String>());
 			}
-			ConcurrentHashMap<Integer, String> fileMapping = fileSystem.get(job.getUploaderIP());
-			//fileMapping.put(job.getFileID(), file);
-			
+			HashMap<Integer, String> fileMapping = fileSystem.get(job.getUploaderIP());
+			for (Integer i : job.getFileIds())
+				fileMapping.put(i, FileLocations.pathForFileid(job.getUploaderIP(), i));
 		}
 		
 		updateable.send(new StatusUpdate("VM DownloadJob result: " + success, VMState.EXECUTING));
@@ -153,7 +154,6 @@ public class JobExecutor {
 	 * @throws IOException If the file could not be forwarded
 	 */
 	private void executeForwardJob(ForwardJob job) throws IOException, JSchException{
-		InetAddress ip = job.getTarget();
 		String file = "";
 		// Note that the path for output IS NOT THE SAME as the ip to forward to
 		if (job.isTarForwarder()){
@@ -161,13 +161,16 @@ public class JobExecutor {
 		} else {
 			file = FileLocations.pathForOutput(job.getIP(), job.getFileName());
 		}
-		// TODO forward the contents of 'file' to 'ip'
+		HashMap<Integer, String> files = new HashMap<Integer, String>();
+		files.put(-1, file);
+		FTPService.offer(files);
+		FTPService.waitForOffer(FTPService.sessionFromFiles(files), 120000);
 		// Now that we have completed our business, clear up all the resources associated with
 		// this set of jobs.
 		if (job.isTarForwarder())
 			new File(FileLocations.pathForTar(job.getIP(), job.getFileName())).delete();
 		new File(FileLocations.pathForOutput(job.getIP(), job.getFileName())).delete();
-		ConcurrentHashMap<Integer, String> fileMapping = null;
+		HashMap<Integer, String> fileMapping = null;
 		synchronized (fileSystem){
 			fileMapping = fileSystem.remove(job.getIP());
 		}
