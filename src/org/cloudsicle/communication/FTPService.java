@@ -194,8 +194,8 @@ public class FTPService {
 				session = jsch.getSession("root", ip.getHostAddress(), 22);
 			} else {
 				session = jsch
-						.getSession("in439204", ip.getHostAddress(), 22);
-				session.setPassword("Pkk6gE5g");
+						.getSession(DefaultNetworkVariables.DAS4_USERNAME, ip.getHostAddress(), 22);
+				session.setPassword(DefaultNetworkVariables.DAS4_PASSWORD);
 			}
 
 			jsch.addIdentity("~/.ssh/id_dsa");

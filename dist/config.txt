@@ -1,0 +1,14 @@
+#
+# DAS4 Log-in credentials
+#
+# Format:
+#  username=<yourusername>
+#  password=<yourpassword>
+#
+# Example:
+#  username=bob
+#  password=3uper3ecretpa33word
+#
+# Optionally you may specify "comport" and "ftpport"
+# as the port bindings for communication
+
