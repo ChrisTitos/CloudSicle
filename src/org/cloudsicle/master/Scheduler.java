@@ -50,8 +50,8 @@ public class Scheduler implements Runnable {
 	
 	public void vmIsDone(int vmId){
 		SlaveVM vm = pool.getVMById(vmId);
-		pool.releaseVM(vm);
 		this.monitor.moveJobToFinished(vm.getAssignedJob());
+		pool.releaseVM(vm);
 
 	}
 	
@@ -118,12 +118,12 @@ public class Scheduler implements Runnable {
 				System.out.println("Sending Activity to "
 						+ vm.getId() + "@" + vm.getIp().getHostAddress());
 				sender.send(activity, true);
-				monitor.moveJobToRunning(meta.getId());
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (JSchException e) {
 				e.printStackTrace();
 			}
 		}
+		monitor.moveJobToRunning(meta.getId());
 	}
 }

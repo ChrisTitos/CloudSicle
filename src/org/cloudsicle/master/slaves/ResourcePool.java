@@ -83,6 +83,7 @@ public class ResourcePool {
 					synchronized (vmsAvailable) {
 						vmsAvailable.add(slave);
 						slave.setState(VMState.WAITING);
+						slave.setBootEndtime(System.currentTimeMillis());
 					}
 					System.out.println("VM " + slave.getId()
 							+ " now available. " + vmsAvailable.size()
@@ -188,6 +189,8 @@ public class ResourcePool {
 			vm.hardExit();
 		vmsInUse.clear();
 		vmsAvailable.clear();
+		System.out.println(this.allVms.values());
+
 	}
 
 	@Override
