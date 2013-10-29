@@ -48,6 +48,13 @@ public class Scheduler implements Runnable {
 		this.metaJobQueue.push(metajob);
 	}
 	
+	public void vmFailed(int vmId){
+		SlaveVM vm = pool.getVMById(vmId);
+		JobMetaData job = this.monitor.jobFailed(vmId);
+		vm.initialize(); //redeploy jar
+		schedule(job); //reschedule job
+	}
+	
 	public void vmIsDone(int vmId){
 		SlaveVM vm = pool.getVMById(vmId);
 		this.monitor.moveJobToFinished(vm.getAssignedJob());

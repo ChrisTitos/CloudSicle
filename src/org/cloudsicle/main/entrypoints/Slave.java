@@ -207,12 +207,14 @@ public class Slave implements IMessageHandler{
 			JobExecutor executor = new JobExecutor(job, updateable, id);
 			try {
 				executor.run();
-			} catch (UnknownJobException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (JSchException e) {
-				e.printStackTrace();
+				try {
+					//Executing the job went wrong, we signal the master and shut ourselves down
+					updateable.send(new StatusUpdate("VM Failure: " + e.getMessage(), id, VMState.FAILED));
+					System.exit(0);
+				} catch (Exception e1) {}
+
 			}
 		}
 		

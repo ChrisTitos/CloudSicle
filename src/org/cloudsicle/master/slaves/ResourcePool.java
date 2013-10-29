@@ -102,9 +102,8 @@ public class ResourcePool {
 	 * @throws UnreachableVMException
 	 *             If we could not reach the VM to tell them to shut down
 	 */
-	private void removeVM(SlaveVM vm) throws UnreachableVMException {
+	public void removeVM(SlaveVM vm) throws UnreachableVMException {
 		System.out.println("DEBUG: VM " + vm.getId() + " is deleted");
-
 		if (vmsInUse.contains(vm))
 			vmsInUse.remove(vm);
 		if (vmsAvailable.contains(vm))

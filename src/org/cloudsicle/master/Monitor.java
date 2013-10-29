@@ -1,6 +1,5 @@
 package org.cloudsicle.master;
 
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.cloudsicle.messages.JobMetaData;
@@ -31,17 +30,29 @@ public class Monitor {
 	}
 
 	public void moveJobToFinished(int id) {
-		System.out.println("Trying to move Job " + id + " from " + runningJobs.keySet());
-
 		JobMetaData job = runningJobs.remove(id);
 		job.setEndtime(System.currentTimeMillis());
 		finishedJobs.put(id, job);
+	}
+	
+	/**
+	 * Add the job to the failed jobs list and also add it to waiting again.
+	 * @param id
+	 * @return The job that failed
+	 */
+	public JobMetaData jobFailed(int id){
+		JobMetaData job = runningJobs.remove(id);
+		failedJobs.put(id, job);
+		addjobWaiting(job);
+		
+		return job;
 	}
 
 	public String toString() {
 		String status = "Jobs waiting for execution: " + waitingJobs.size()
 				+ "\n" + "Jobs running: " + runningJobs.size() + "\n"
-				+ "Finished jobs: " + finishedJobs.size() + "\n";
+				+ "Finished jobs: " + finishedJobs.size() + "\n" +
+				"Failed jobs (resubmitted): " + failedJobs.size() + "\n";
 		long totaltime = 0;
 		for(JobMetaData job : finishedJobs.values()){
 			totaltime += (job.getEndtime() - job.getStarttime());
