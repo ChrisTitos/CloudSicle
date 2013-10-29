@@ -102,12 +102,14 @@ public class Scheduler implements Runnable {
 			DownloadJob d = new DownloadJob(filelist, meta.getSender());
 			CombineJob c = new CombineJob(filelist);
 			CompressJob comp = new CompressJob();
-			ForwardJob f = new ForwardJob(true);
+			ForwardJob f = new ForwardJob(false); // TODO send compressed
+			c.setIP(meta.getSender());
+			comp.setIP(meta.getSender());
 			f.setIP(meta.getSender());
 			list.add(d);
 			list.add(c);
 			list.add(comp);
-			//list.add(f);
+			list.add(f);
 			
 			Activity activity = new Activity(list);
 			activity.setClient(meta.getSender());

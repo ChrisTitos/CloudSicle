@@ -41,7 +41,7 @@ public class GifsicleRunner {
 	 * Build the raw command to execute gifsicle
 	 */
 	private String buildCommand(String[] files, String output){
-		String result = "gifsicle";
+		String result = "./gifsicle";
 		result += " --delay=" + delay;
 		if (loop)
 			result += " --loop";

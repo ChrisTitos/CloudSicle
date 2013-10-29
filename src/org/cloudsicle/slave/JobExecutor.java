@@ -165,17 +165,19 @@ public class JobExecutor {
 	private void executeForwardJob(ForwardJob job) throws IOException, JSchException{
 		updateable.send(new StatusUpdate("VM Executing ForwardJob", id, VMState.EXECUTING));
 
-		String file = "";
-		// Note that the path for output IS NOT THE SAME as the ip to forward to
-		if (job.isTarForwarder()){
-			file = FileLocations.pathForTar(job.getIP(), job.getFileName());
-		} else {
-			file = FileLocations.pathForOutput(job.getIP(), job.getFileName());
-		}
 		HashMap<Integer, String> files = new HashMap<Integer, String>();
-		files.put(-1, file);
+		if (job.isTarForwarder()){
+			String file = FileLocations.pathForTar(job.getIP(), job.getFileName());
+			files.put(-2, file);
+		} else {
+			String file = FileLocations.pathForOutput(job.getIP(), job.getFileName());
+			files.put(-1, file);
+		}
 		
 		FTPService.offer(files);
+		
+		FTPService.invokeRemote(job.getIP(), FTPService.sessionFromFiles(files));
+		
 		FTPService.waitForOffer(FTPService.sessionFromFiles(files), 120000);
 		// Now that we have completed our business, clear up all the resources associated with
 		// this set of jobs.

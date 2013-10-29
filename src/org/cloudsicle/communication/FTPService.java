@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -167,7 +168,11 @@ public class FTPService {
 	 */
 	public static boolean downloadSock(InetAddress ip, String sessionid, String outputFolder){
 		try {
-			Socket s = new Socket(ip,DefaultNetworkVariables.DEFAULT_FTP_PORT);
+			Socket s = new Socket();
+			s.setReuseAddress(true);
+			s.setSoLinger(true, 0);
+			s.bind(null);
+			s.connect(new InetSocketAddress(ip,DefaultNetworkVariables.DEFAULT_FTP_PORT));
 			InputStream is = s.getInputStream();
 			OutputStream os = s.getOutputStream();
 			boolean success = download(is,os,sessionid,outputFolder);
@@ -313,6 +318,127 @@ public class FTPService {
 		}
 	}
 	
+	/**
+	 * Perform a raw upload session
+	 * 
+	 * NOT FOR OUTSIDE USE
+	 * 
+	 * @param is The input stream of the session
+	 * @param os The output stream of the session
+	 * @return The name of the remotely invocated session, null otherwise
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	private static String directUploadSession(InputStream is, OutputStream os) throws IOException, ClassNotFoundException{
+		//Wait for the downloader to put his session description on the stream
+		int timeout = 100;				
+		while(is.available() < 10 && timeout > 0){
+			try { Thread.sleep(50);} catch (InterruptedException e) {}
+			timeout--;
+		}
+		if (timeout == 0){
+			System.out.println("DEBUG: Did not receive FTP session identifier, dropping connection");
+			return null;
+		}
+		
+		ObjectInputStream ois = new ObjectInputStream(is);
+		String session = (String) ois.readObject();
+		
+		//Are we being remote invoked?
+		if (session.startsWith("REMOTE_INVOCATION:")){
+			return session.substring(18);
+		}
+		
+		System.out.println("DEBUG: Starting upload session \"" + session + "\"");
+		
+		//Receive session identifier
+		boolean knownsession = false;
+		synchronized(openDownloadables){
+			knownsession = openDownloadables.containsKey(session);
+		}
+		if (!knownsession){
+			//If an unknown session is being requested send a 0 (false)
+			System.out.println("DEBUG: Unknown download session requested (\""+session+"\"), exiting");
+			os.write(0);
+			os.flush();
+			return null;
+		}
+		//If an known session is being requested send a 1 (true)
+		os.write(1);
+		os.flush();
+		
+		HashMap<Integer, String> filemapping = null;
+		synchronized(openDownloadables){
+			filemapping = openDownloadables.remove(session);
+		}
+		for (Integer map : filemapping.keySet()){
+			String fpath = filemapping.get(map);
+			FileInputStream fis = new FileInputStream(fpath);
+		
+			//Write our file identifier before the stream, so
+			//the receiver knows what is coming in.
+			byte[] identifier = ByteBuffer.allocate(4).putInt(map.intValue()).array();
+			os.write(identifier);
+			
+			//Put the file size on the stream
+			long filesize = new File(fpath).length();
+			byte[] filesizeheader = ByteBuffer.allocate(8).putLong(filesize).array();
+			os.write(filesizeheader);
+			os.flush();
+			
+			System.out.println("DEBUG: Sending fileid " + map.intValue() + " (" + filesize + " bytes)");
+			
+			//Write the raw file to stream
+			int data = 0;
+			while ((data = fis.read()) != -1)
+				os.write(data);
+			fis.close();
+			System.out.println("DEBUG: Done sending file");
+			os.flush();
+		}
+		System.out.println("DEBUG: Finished session \"" + session + "\"");
+		return null;
+	}
+	
+	/**
+	 * Invoke a peer to download a file from us
+	 * 
+	 * @param ip The peer to download one of our sessions
+	 * @param session Our download session
+	 * @return If the invocation was successful
+	 */
+	public static boolean invokeRemote(InetAddress ip, String session){
+		try {
+			Socket s = new Socket();
+			s.setReuseAddress(true);
+			s.setSoLinger(true, 0);
+			s.bind(null);
+			s.connect(new InetSocketAddress(ip,DefaultNetworkVariables.DEFAULT_FTP_PORT));
+			
+			InputStream is = s.getInputStream();
+			OutputStream os = s.getOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+			oos.writeObject("REMOTE_INVOCATION:" + session);
+			oos.flush();
+			
+			directUploadSession(is, os);
+			
+			while (!s.isInputShutdown())
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {}
+			
+			s.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			return false;
+		} 
+		return true;
+	}
+	
 	private static class OfferingThread implements Runnable{
 		
 		private boolean alive = true;
@@ -323,7 +449,7 @@ public class FTPService {
 		}
 		
 		public void quit(){
-			alive = false;
+			//alive = false;
 		}
 		
 		public boolean hasStarted(){
@@ -341,79 +467,23 @@ public class FTPService {
 				serverSocket.setSoTimeout(THREAD_HEARTBEAT);
 				while (alive){
 					try {
-						Socket s = serverSocket.accept();
+						System.out.println("DEBUG: Accepting new FTP requests");
+						final Socket s = serverSocket.accept();
 						OutputStream os = new BufferedOutputStream(s.getOutputStream());
 						
 						System.out.println("DEBUG: Accepted new FTP request from " + s.getRemoteSocketAddress());
 						
-						//Wait for the downloader to put his session description on the stream
-						int timeout = 100;				
-						while(s.getInputStream().available() < 10 && timeout > 0){
-							try { Thread.sleep(50);} catch (InterruptedException e) {}
-							timeout--;
-						}
-						if (timeout == 0){
-							System.out.println("DEBUG: Did not receive FTP session identifier, dropping connection");
-							continue;
-						}
+						final String remote = directUploadSession(s.getInputStream(), s.getOutputStream());
 						
-						ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
-						String session = (String) ois.readObject();
-						
-						System.out.println("DEBUG: Starting upload session \"" + session + "\"");
-						
-						//Receive session identifier
-						boolean knownsession = false;
-						synchronized(openDownloadables){
-							knownsession = openDownloadables.containsKey(session);
-						}
-						if (!knownsession){
-							//If an unknown session is being requested send a 0 (false)
-							System.out.println("DEBUG: Unknown download session requested (\""+session+"\"), exiting");
-							os.write(0);
-							os.flush();
+						if (remote != null){
+							System.out.println("DEBUG: Remote invocation detected: starting download session " + remote);
+							download(s.getInputStream(), s.getOutputStream(), remote, "");
 							s.close();
 							continue;
-						}
-						//If an known session is being requested send a 1 (true)
-						os.write(1);
-						os.flush();
-						
-						HashMap<Integer, String> filemapping = null;
-						synchronized(openDownloadables){
-							filemapping = openDownloadables.remove(session);
-						}
-						for (Integer map : filemapping.keySet()){
-							String fpath = filemapping.get(map);
-							FileInputStream fis = new FileInputStream(fpath);
-						
-							//Write our file identifier before the stream, so
-							//the receiver knows what is coming in.
-							byte[] identifier = ByteBuffer.allocate(4).putInt(map.intValue()).array();
-							os.write(identifier);
-							
-							//Put the file size on the stream
-							long filesize = new File(fpath).length();
-							byte[] filesizeheader = ByteBuffer.allocate(8).putLong(filesize).array();
-							os.write(filesizeheader);
-							os.flush();
-							
-							System.out.println("DEBUG: Sending fileid " + map.intValue() + " (" + filesize + " bytes)");
-							
-							//Write the raw file to stream
-							int data = 0;
-							while ((data = fis.read()) != -1)
-								os.write(data);
-							fis.close();
-							System.out.println("DEBUG: Done sending file");
-							os.flush();
 						}
 						
 						os.close();
 						s.close();
-						
-						System.out.println("DEBUG: Finished session \"" + session + "\"");
-	
 					} catch (ClassNotFoundException e) {
 						System.err.println("Failed to read session descriptor from stream!");
 					} catch (SocketTimeoutException e) {
