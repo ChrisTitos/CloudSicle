@@ -82,6 +82,7 @@ public class ResourcePool {
 				if (slave.initialize()) {
 					synchronized (vmsAvailable) {
 						vmsAvailable.add(slave);
+						slave.setState(VMState.WAITING);
 					}
 					System.out.println("VM " + slave.getId()
 							+ " now available. " + vmsAvailable.size()
@@ -149,6 +150,7 @@ public class ResourcePool {
 	 */
 	public void releaseVM(SlaveVM vm) {
 		System.out.println("DEBUG: VM " + vm.getId() + " is available again");
+		vm.setState(VMState.WAITING);
 		this.vmsInUse.remove(vm);
 		this.vmsAvailable.add(vm);
 

@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import org.cloudsicle.communication.SocketSender;
 import org.cloudsicle.main.VMState;
+import org.cloudsicle.messages.JobMetaData;
 import org.opennebula.client.Client;
 import org.opennebula.client.OneResponse;
 import org.opennebula.client.vm.VirtualMachine;
@@ -29,7 +30,9 @@ public class SlaveVM {
 	private InetAddress ip;
 	private VMState state;
 	
-	private boolean inUse = false;
+	private int processedJobs;
+	private int assignedJob;
+	
 	
 	/**
 	 * Set up a slave VM
@@ -38,6 +41,7 @@ public class SlaveVM {
 	 * @throws UninstantiableException If something went wrong when initializing
 	 */
 	public SlaveVM(Client client) throws UninstantiableException{
+		processedJobs = 0;
 		this.client = client;
 	}
 	
@@ -87,22 +91,6 @@ public class SlaveVM {
 		
 	}
 	
-	/**
-	 * Flag if this VM is currently in use by the scheduler
-	 * 
-	 * @param b New value
-	 */
-	public void setIsInUse(boolean b){
-		this.inUse = b;
-	}
-	
-	/**
-	 * @return Whether this VM is in use by the scheduler
-	 */
-	public boolean isInUse(){
-		return inUse;
-	}
-
 	/**
 	 * @return The id of this VM
 	 */
@@ -194,6 +182,15 @@ public class SlaveVM {
 	
 	public VMState getState(){
 		return this.state;
+	}
+	
+	public void assignJob(JobMetaData job){
+		this.assignedJob = job.getId();
+		this.processedJobs++;
+	}
+	
+	public int getAssignedJob(){
+		return assignedJob;
 	}
 	
 }

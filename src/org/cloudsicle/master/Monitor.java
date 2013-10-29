@@ -1,46 +1,41 @@
 package org.cloudsicle.master;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.cloudsicle.messages.JobMetaData;
 
 public class Monitor {
 
-	private ArrayList<JobMetaData> waitingJobs;
-	private ArrayList<JobMetaData> runningJobs;
-	private ArrayList<JobMetaData> finishedJobs;
-	private ArrayList<JobMetaData> failedJobs;
+	private ConcurrentHashMap<Integer, JobMetaData> waitingJobs;
+	private ConcurrentHashMap<Integer, JobMetaData> runningJobs;
+	private ConcurrentHashMap<Integer, JobMetaData> finishedJobs;
+	private ConcurrentHashMap<Integer, JobMetaData> failedJobs;
 
 	public Monitor() {
-		waitingJobs = new ArrayList<JobMetaData>();
-		runningJobs = new ArrayList<JobMetaData>();
-		finishedJobs = new ArrayList<JobMetaData>();
-		failedJobs = new ArrayList<JobMetaData>();
+		waitingJobs = new ConcurrentHashMap<Integer, JobMetaData>();
+		runningJobs = new ConcurrentHashMap<Integer, JobMetaData>();
+		finishedJobs = new ConcurrentHashMap<Integer, JobMetaData>();
+		failedJobs = new ConcurrentHashMap<Integer, JobMetaData>();
 
 	}
 
 	public void addjobWaiting(JobMetaData job) {
-		waitingJobs.add(job);
+		waitingJobs.put(job.getId(), job);
 	}
 
-	public void removejobWaiting(JobMetaData job) {
-		waitingJobs.remove(job);
+	public void moveJobToRunning(int id) {
+		JobMetaData job = waitingJobs.remove(id);
+		runningJobs.put(id, job);
+		
 	}
 
-	public void addjobRunning(JobMetaData job) {
-		runningJobs.add(job);
-	}
+	public void moveJobToFinished(int id) {
+		System.out.println("Trying to move Job " + id + " from " + runningJobs.keySet());
 
-	public void removejobRunning(JobMetaData job) {
-		runningJobs.remove(job);
-	}
-
-	public void addjobFinished(JobMetaData job) {
-		finishedJobs.add(job);
-	}
-
-	public void removejobFinished(JobMetaData job) {
-		finishedJobs.remove(job);
+		JobMetaData job = runningJobs.remove(id);
+		job.setEndtime(System.currentTimeMillis());
+		finishedJobs.put(id, job);
 	}
 
 	public String toString() {
@@ -48,7 +43,7 @@ public class Monitor {
 				+ "\n" + "Jobs running: " + runningJobs.size() + "\n"
 				+ "Finished jobs: " + finishedJobs.size() + "\n";
 		long totaltime = 0;
-		for(JobMetaData job : finishedJobs){
+		for(JobMetaData job : finishedJobs.values()){
 			totaltime += (job.getEndtime() - job.getStarttime());
 		}
 		long average = totaltime / finishedJobs.size();

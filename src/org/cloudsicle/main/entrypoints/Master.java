@@ -30,6 +30,7 @@ public class Master implements IMessageHandler {
 	@Override
 	public void finalize() throws Throwable{
 		scheduler.hardExit();
+		System.out.println(monitor);
 		FTPService.stop();
 		super.finalize();
 	}
