@@ -82,6 +82,8 @@ public class ResourcePool {
 				if (slave.initialize()) {
 					synchronized (vmsAvailable) {
 						vmsAvailable.add(slave);
+						slave.setState(VMState.WAITING);
+						slave.setBootEndtime(System.currentTimeMillis());
 					}
 					System.out.println("VM " + slave.getId()
 							+ " now available. " + vmsAvailable.size()
@@ -100,9 +102,8 @@ public class ResourcePool {
 	 * @throws UnreachableVMException
 	 *             If we could not reach the VM to tell them to shut down
 	 */
-	private void removeVM(SlaveVM vm) throws UnreachableVMException {
+	public void removeVM(SlaveVM vm) throws UnreachableVMException {
 		System.out.println("DEBUG: VM " + vm.getId() + " is deleted");
-
 		if (vmsInUse.contains(vm))
 			vmsInUse.remove(vm);
 		if (vmsAvailable.contains(vm))
@@ -149,6 +150,7 @@ public class ResourcePool {
 	 */
 	public void releaseVM(SlaveVM vm) {
 		System.out.println("DEBUG: VM " + vm.getId() + " is available again");
+		vm.setState(VMState.WAITING);
 		this.vmsInUse.remove(vm);
 		this.vmsAvailable.add(vm);
 
@@ -186,6 +188,8 @@ public class ResourcePool {
 			vm.hardExit();
 		vmsInUse.clear();
 		vmsAvailable.clear();
+		System.out.println(this.allVms.values());
+
 	}
 
 	@Override

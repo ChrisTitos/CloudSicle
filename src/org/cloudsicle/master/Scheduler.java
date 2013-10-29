@@ -48,9 +48,18 @@ public class Scheduler implements Runnable {
 		this.metaJobQueue.push(metajob);
 	}
 	
+	public void vmFailed(int vmId){
+		SlaveVM vm = pool.getVMById(vmId);
+		JobMetaData job = this.monitor.jobFailed(vmId);
+		vm.initialize(); //redeploy jar
+		schedule(job); //reschedule job
+	}
+	
 	public void vmIsDone(int vmId){
 		SlaveVM vm = pool.getVMById(vmId);
+		this.monitor.moveJobToFinished(vm.getAssignedJob());
 		pool.releaseVM(vm);
+
 	}
 	
 	public void hardExit(){
@@ -73,14 +82,13 @@ public class Scheduler implements Runnable {
 							+ metajob.getSender());
 
 					SlaveVM vm = this.pool.requestVM();
+					vm.assignJob(metajob);
 					Allocation alloc = new Allocation();
 					alloc.allocate(vm, metajob.getFiles()); // for now just
 																// give
 																// everything to
 																// one vm
-						createActivity(metajob, alloc);
-
-					
+					createActivity(metajob, alloc);					
 				}
 			}
 		}
@@ -125,5 +133,6 @@ public class Scheduler implements Runnable {
 				e.printStackTrace();
 			}
 		}
+		monitor.moveJobToRunning(meta.getId());
 	}
 }
