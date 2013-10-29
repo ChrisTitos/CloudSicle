@@ -467,7 +467,7 @@ public class FTPService {
 				serverSocket.setSoTimeout(THREAD_HEARTBEAT);
 				while (alive){
 					try {
-						System.out.println("DEBUG: Accepting new FTP requests");
+						//System.out.println("DEBUG: Accepting new FTP requests");
 						final Socket s = serverSocket.accept();
 						OutputStream os = new BufferedOutputStream(s.getOutputStream());
 						
