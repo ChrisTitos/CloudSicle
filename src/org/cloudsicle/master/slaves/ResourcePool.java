@@ -18,7 +18,7 @@ public class ResourcePool {
 	private ArrayList<SlaveVM> vmsInUse = new ArrayList<SlaveVM>();
 	private ArrayList<SlaveVM> vmsAvailable = new ArrayList<SlaveVM>();
 	private HashMap<Integer, SlaveVM> allVms = new HashMap<Integer, SlaveVM>();
-	
+
 	private static int VM_TIMEOUT = 6000;
 
 	/**
@@ -86,8 +86,6 @@ public class ResourcePool {
 					System.out.println("VM " + slave.getId()
 							+ " now available. " + vmsAvailable.size()
 							+ " VMs in total");
-					System.out.println("VMs: " + allVms.keySet());
-
 				}
 			}
 		};
@@ -105,7 +103,6 @@ public class ResourcePool {
 	private void removeVM(SlaveVM vm) throws UnreachableVMException {
 		System.out.println("DEBUG: VM " + vm.getId() + " is deleted");
 
-		this.allVms.remove(vm.getId());
 		if (vmsInUse.contains(vm))
 			vmsInUse.remove(vm);
 		if (vmsAvailable.contains(vm))
@@ -128,7 +125,8 @@ public class ResourcePool {
 		} else {
 			try {
 				addVM();
-				while (availableVMCount() < 1) {} // wait for VM to
+				while (availableVMCount() < 1) {
+				} // wait for VM to become available
 				return getAvailableVM();
 			} catch (UninstantiableException e) {
 				return null;
@@ -156,15 +154,21 @@ public class ResourcePool {
 
 		final int id = vm.getId();
 
-		if (allVms.size() > 1) {
-			Thread timeout = new Thread() {
-				public void run() {
-					try {Thread.sleep(ResourcePool.VM_TIMEOUT);	} catch (InterruptedException e) {}
+		Thread timeout = new Thread() {
+			public void run() {
+				try {
+					Thread.sleep(ResourcePool.VM_TIMEOUT);
+				} catch (InterruptedException e) {
+				}
+				// always keep one VM alive
+				if (availableVMCount() > 1) { 
+
 					removeVM(allVms.get(id));
 				}
-			};
-			timeout.start();
-		}
+			}
+		};
+		timeout.start();
+
 	}
 
 	private synchronized int availableVMCount() {

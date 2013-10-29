@@ -101,6 +101,9 @@ public class Slave implements IMessageHandler{
 					if (jobQueue.size() == 0 && thread == null){
 						thread = new JobExecutionThread(jobQueue, sender);
 						thread.start();
+					} else if(thread != null && !thread.isAlive()){
+						thread = new JobExecutionThread(jobQueue, sender);
+						thread.start();
 					}
 				}
 				
