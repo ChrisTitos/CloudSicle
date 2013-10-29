@@ -73,8 +73,8 @@ public class Scheduler implements Runnable {
 							+ metajob.getSender());
 
 					SlaveVM vm = this.pool.requestVM();
-						Allocation alloc = new Allocation();
-						alloc.allocate(vm, metajob.getFiles()); // for now just
+					Allocation alloc = new Allocation();
+					alloc.allocate(vm, metajob.getFiles()); // for now just
 																// give
 																// everything to
 																// one vm
@@ -105,9 +105,9 @@ public class Scheduler implements Runnable {
 			ForwardJob f = new ForwardJob(true);
 			f.setIP(meta.getSender());
 			list.add(d);
-			//list.add(c);
-			//list.add(comp);
-			//oklist.add(f);
+			list.add(c);
+			list.add(comp);
+			//list.add(f);
 			
 			Activity activity = new Activity(list);
 			activity.setClient(meta.getSender());

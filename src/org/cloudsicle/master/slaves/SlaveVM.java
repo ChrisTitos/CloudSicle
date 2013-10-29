@@ -128,7 +128,8 @@ public class SlaveVM {
 	 * Stateless exit
 	 */
 	public void hardExit(){
-		vm.delete();
+		OneResponse result = vm.shutdown();
+		if(result.isError()) System.out.println(result.getErrorMessage());
 	}
 	
 		
