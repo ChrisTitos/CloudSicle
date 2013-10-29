@@ -52,6 +52,9 @@ public class Master implements IMessageHandler {
 			if(update.getState() == VMState.DONE){
 				System.out.println(update.getVmId() + " saying he is done");
 				this.scheduler.vmIsDone(update.getVmId());
+			} else if(update.getState() == VMState.FAILED){
+				System.out.println(update.getVmId() + " has failed");
+				this.scheduler.vmFailed(update.getVmId());
 			}
 		}
 	}

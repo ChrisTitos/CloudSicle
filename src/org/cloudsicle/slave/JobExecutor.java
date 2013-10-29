@@ -4,9 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.InetAddress;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,6 +17,7 @@ import org.cloudsicle.main.jobs.CompressJob;
 import org.cloudsicle.main.jobs.DownloadJob;
 import org.cloudsicle.main.jobs.ForwardJob;
 import org.cloudsicle.main.jobs.IJob;
+import org.cloudsicle.main.jobs.WaitForResultsJob;
 import org.cloudsicle.messages.StatusUpdate;
 import org.kamranzafar.jtar.TarEntry;
 import org.kamranzafar.jtar.TarOutputStream;
@@ -49,6 +48,8 @@ public class JobExecutor {
 			type = JobType.DOWNLOAD;
 		else if (job instanceof ForwardJob)
 			type = JobType.FORWARD;
+		else if(job instanceof WaitForResultsJob)
+			type = JobType.WAITRESULT;
 		else
 			type = JobType.UNKNOWN;
 	}
@@ -71,6 +72,8 @@ public class JobExecutor {
 		case FORWARD:
 			executeForwardJob((ForwardJob) job);
 			break;
+		case WAITRESULT:
+			executeWaitForResultsJob((WaitForResultsJob) job);
 		case UNKNOWN:
 			throw new UnknownJobException();
 		default:
@@ -190,7 +193,22 @@ public class JobExecutor {
 			new File(path).delete();
 	}
 	
+	private void executeWaitForResultsJob(WaitForResultsJob job) {
+		int expected = job.getExpectedCount();
+		while(new File("result").list().length < expected){}
+		File folder = new File("result");
+		
+		synchronized (fileSystem){
+			if (!fileSystem.containsKey(job.getIP())){
+				fileSystem.put(job.getIP(), new HashMap<Integer, String>());
+			}
+			HashMap<Integer, String> fileMapping = fileSystem.get(job.getIP());
+			for (File i : folder.listFiles())
+				fileMapping.put(Integer.valueOf(i.getName().replaceAll("[:.]", "").replace("gif", "")), i.getAbsolutePath());
+		}		
+	}
+	
 	private enum JobType{
-		COMBINE, COMPRESS, DOWNLOAD, FORWARD, PRESENT, PRODUCE, UNKNOWN;
+		COMBINE, COMPRESS, DOWNLOAD, FORWARD, PRESENT, PRODUCE, UNKNOWN, WAITRESULT;
 	}
 }
