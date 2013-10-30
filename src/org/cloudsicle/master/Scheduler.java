@@ -1,26 +1,13 @@
 package org.cloudsicle.master;
 
-import java.io.IOException;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashMap;
 
-import org.cloudsicle.communication.SocketSender;
-import org.cloudsicle.main.jobs.CombineJob;
-import org.cloudsicle.main.jobs.CompressJob;
-import org.cloudsicle.main.jobs.DownloadJob;
-import org.cloudsicle.main.jobs.ForwardJob;
-import org.cloudsicle.main.jobs.IJob;
 import org.cloudsicle.master.allocation.IAllocator;
-import org.cloudsicle.master.allocation.JobPerVMAllocator;
+import org.cloudsicle.master.allocation.SplitJobAllocator;
 import org.cloudsicle.master.slaves.ResourcePool;
 import org.cloudsicle.master.slaves.SlaveVM;
-import org.cloudsicle.messages.Activity;
-import org.cloudsicle.messages.Allocation;
 import org.cloudsicle.messages.JobMetaData;
 import org.opennebula.client.ClientConfigurationException;
-
-import com.jcraft.jsch.JSchException;
 
 public class Scheduler implements Runnable {
 
@@ -39,7 +26,7 @@ public class Scheduler implements Runnable {
 		this.pool = new ResourcePool();
 		this.metaJobQueue = new ArrayDeque<JobMetaData>();
 		this.monitor = monitor;
-		this.allocator = new JobPerVMAllocator(this.pool, this.monitor);
+		this.allocator = new SplitJobAllocator(this.pool, this.monitor);
 		new Thread(this).start();
 	}
 

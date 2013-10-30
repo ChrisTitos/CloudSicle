@@ -145,7 +145,7 @@ public class ResourcePool {
 			}
 		} else {
 			try {
-				for(int i=0; i<count; i++){
+				for(int i=0; i<(count - availableVMCount()); i++){
 					addVM();
 				}
 				while (availableVMCount() < count) {

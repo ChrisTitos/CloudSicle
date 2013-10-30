@@ -92,9 +92,10 @@ public class Slave implements IMessageHandler{
 		if (message instanceof Activity){
 			try {
 				this.id = ((Activity) message).getVMId();
-				StatusUpdate status = new StatusUpdate("VM Received Activity", id, VMState.EXECUTING);
+				StatusUpdate status = new StatusUpdate("VM " + id + " Received Activity", id, VMState.EXECUTING);
 				SocketSender sender = new SocketSender(false, ((Activity) message).getSender());		
-			
+				sender.send(status);
+
 				ArrayList<IJob> jobs = ((Activity) message).getJobs();
 				
 				synchronized (jobQueue){
@@ -108,14 +109,13 @@ public class Slave implements IMessageHandler{
 				}
 				
 				for (IJob job : jobs){
-					if (job instanceof INeedOwnIP)
+					if (job instanceof INeedOwnIP && ((INeedOwnIP) job).getIP() == null)
 						((INeedOwnIP)job).setIP(((Activity) message).getClient());
 					synchronized (jobQueue){
 						jobQueue.add(job);
 					}
 				}
 
-				sender.send(status);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (JSchException e) {
@@ -129,7 +129,7 @@ public class Slave implements IMessageHandler{
 			} else {
 				//We are not doing anything, exit now
 				try {
-					sender.send(new StatusUpdate("VM Shutting down on soft exit request.", id, VMState.SHUTDOWN));
+					sender.send(new StatusUpdate("VM " + id + " Shutting down on soft exit request.", id, VMState.SHUTDOWN));
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (JSchException e) {
@@ -185,7 +185,7 @@ public class Slave implements IMessageHandler{
 			//Our consumer Thread will stop either way
 			if (callExit){
 				try {
-					updateable.send(new StatusUpdate("VM Shutting down on soft exit request.", id, VMState.SHUTDOWN));
+					updateable.send(new StatusUpdate("VM " + id + " Shutting down on soft exit request.", id, VMState.SHUTDOWN));
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (JSchException e) {
@@ -194,7 +194,7 @@ public class Slave implements IMessageHandler{
 				System.exit(0);
 			} else {
 				try {
-					updateable.send(new StatusUpdate("VM Done processing all jobs.", id, VMState.DONE));
+					updateable.send(new StatusUpdate("VM " + id + " Done processing all jobs.", id, VMState.DONE));
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (JSchException e) {
@@ -211,7 +211,7 @@ public class Slave implements IMessageHandler{
 				e.printStackTrace();
 				try {
 					//Executing the job went wrong, we signal the master and shut ourselves down
-					updateable.send(new StatusUpdate("VM Failure: " + e.getMessage(), id, VMState.FAILED));
+					updateable.send(new StatusUpdate("VM " + id + " Failure: " + e.getMessage(), id, VMState.FAILED));
 					System.exit(0);
 				} catch (Exception e1) {}
 

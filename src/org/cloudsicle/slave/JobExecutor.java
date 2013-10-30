@@ -3,6 +3,7 @@ package org.cloudsicle.slave;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -33,10 +34,10 @@ public class JobExecutor {
 	 * The id of this virtual machine
 	 */
 	private int id;
-	
+
 	private static ConcurrentHashMap<InetAddress, HashMap<Integer, String>> fileSystem = new ConcurrentHashMap<InetAddress, HashMap<Integer, String>>();
-	
-	public JobExecutor(IJob job, SocketSender updater, int id){
+
+	public JobExecutor(IJob job, SocketSender updater, int id) {
 		this.updateable = updater;
 		this.job = job;
 		this.id = id;
@@ -48,18 +49,19 @@ public class JobExecutor {
 			type = JobType.DOWNLOAD;
 		else if (job instanceof ForwardJob)
 			type = JobType.FORWARD;
-		else if(job instanceof WaitForResultsJob)
+		else if (job instanceof WaitForResultsJob)
 			type = JobType.WAITRESULT;
 		else
 			type = JobType.UNKNOWN;
 	}
-	
+
 	/**
 	 * Blocking execution of our job.
-	 * @throws JSchException 
+	 * 
+	 * @throws JSchException
 	 */
-	public void run() throws UnknownJobException, IOException, JSchException{
-		switch (type){
+	public void run() throws UnknownJobException, IOException, JSchException {
+		switch (type) {
 		case COMBINE:
 			executeCombineJob((CombineJob) job);
 			break;
@@ -80,126 +82,161 @@ public class JobExecutor {
 			throw new UnknownJobException();
 		}
 	}
-	
+
 	/**
-	 * Combine the files specified by fileids in a combinejob.
-	 * The output is to be found at the unique InetAddress folder of the
-	 * client as "output.gif"
+	 * Combine the files specified by fileids in a combinejob. The output is to
+	 * be found at the unique InetAddress folder of the client as "output.gif"
 	 * 
-	 * @param job The combine job
-	 * @throws IOException If creating the output or reading the input failed
+	 * @param job
+	 *            The combine job
+	 * @throws IOException
+	 *             If creating the output or reading the input failed
 	 */
-	private void executeCombineJob(CombineJob job) throws IOException, JSchException{
-		updateable.send(new StatusUpdate("VM Executing CombineJob", id, VMState.EXECUTING));
+	private void executeCombineJob(CombineJob job) throws IOException,
+			JSchException {
+		updateable.send(new StatusUpdate("VM " + id + " Executing CombineJob", id,
+				VMState.EXECUTING));
 
 		GifsicleRunner program = new GifsicleRunner();
 		program.setDelay(1);
 		program.setLoops(true);
 		File output = new File(job.conjureOutputFile());
 		ArrayList<File> files = new ArrayList<File>();
-		for (int fileid : job.getFiles()){
+		for (int fileid : job.getFiles()) {
 			File f;
-			synchronized (fileSystem){
+			synchronized (fileSystem) {
 				f = new File(fileSystem.get(job.getIP()).get(fileid));
 			}
 			files.add(f);
 		}
 		program.convert(files, output);
 	}
-	
+
 	/**
 	 * Compress the output file of a previous combine job
 	 * 
 	 * @param job
 	 * @throws IOException
 	 */
-	private void executeCompressJob(CompressJob job) throws IOException, JSchException{
-		updateable.send(new StatusUpdate("VM Executing CompressJob", id, VMState.EXECUTING));
+	private void executeCompressJob(CompressJob job) throws IOException,
+			JSchException {
+		updateable.send(new StatusUpdate("VM " + id + " Executing CompressJob", id,
+				VMState.EXECUTING));
 
 		File output = new File(job.conjureOutputFile());
-		File input = new File(FileLocations.pathForOutput(job.getIP(), job.getFileName()));
+		File input = new File(FileLocations.pathForOutput(job.getIP(),
+				job.getFileName()));
 		FileOutputStream fos = new FileOutputStream(output);
 		TarOutputStream tos = new TarOutputStream(fos);
 		tos.putNextEntry(new TarEntry(input, input.getName()));
-	    FileInputStream fis = new FileInputStream(input);
+		FileInputStream fis = new FileInputStream(input);
 
 		int data = 0;
-		
-		while((data = fis.read()) != -1) {
+
+		while ((data = fis.read()) != -1) {
 			tos.write(data);
 		}
-		
+
 		tos.flush();
 		fis.close();
-	    tos.close();
+		tos.close();
 	}
-	
-	/**
-	 * Download a resource from a client and allow each client to 
-	 * access their download onto our system by a file ID.
-	 * 
-	 * @param job The download job to execute
-	 * @throws IOException If the file could not be downloaded
-	 */
-	private void executeDownloadJob(DownloadJob job) throws IOException, JSchException{
-		updateable.send(new StatusUpdate("VM Executing DownloadJob", id, VMState.EXECUTING));
 
-		boolean success = FTPService.downloadSock(job.getUploaderIP(), job.getSession(), FileLocations.folderForIp(job.getUploaderIP()));
-		synchronized (fileSystem){
-			if (!fileSystem.containsKey(job.getUploaderIP())){
-				fileSystem.put(job.getUploaderIP(), new HashMap<Integer, String>());
+	/**
+	 * Download a resource from a client and allow each client to access their
+	 * download onto our system by a file ID.
+	 * 
+	 * @param job
+	 *            The download job to execute
+	 * @throws IOException
+	 *             If the file could not be downloaded
+	 */
+	private void executeDownloadJob(DownloadJob job) throws IOException,
+			JSchException {
+		updateable.send(new StatusUpdate("VM " + id + "  Executing DownloadJob", id,
+				VMState.EXECUTING));
+
+		boolean success = FTPService.downloadSock(job.getUploaderIP(),
+				job.getSession(),
+				FileLocations.folderForIp(job.getUploaderIP()));
+		synchronized (fileSystem) {
+			if (!fileSystem.containsKey(job.getUploaderIP())) {
+				fileSystem.put(job.getUploaderIP(),
+						new HashMap<Integer, String>());
 			}
-			HashMap<Integer, String> fileMapping = fileSystem.get(job.getUploaderIP());
+			HashMap<Integer, String> fileMapping = fileSystem.get(job
+					.getUploaderIP());
 			for (Integer i : job.getFileIds())
-				fileMapping.put(i, FileLocations.pathForFileid(job.getUploaderIP(), i));
+				fileMapping.put(i,
+						FileLocations.pathForFileid(job.getUploaderIP(), i));
 		}
-		
-		updateable.send(new StatusUpdate("VM DownloadJob result: " + success, id, VMState.EXECUTING));
+
+		updateable.send(new StatusUpdate("VM " + id + "  DownloadJob result: " + success,
+				id, VMState.EXECUTING));
 
 	}
-	
+
 	/**
-	 * Forward the specified output and associated resource files
-	 * to another peer.
+	 * Forward the specified output and associated resource files to another
+	 * peer.
 	 * 
-	 * @param job The forward job to execute
-	 * @throws IOException If the file could not be forwarded
+	 * @param job
+	 *            The forward job to execute
+	 * @throws IOException
+	 *             If the file could not be forwarded
 	 */
-	private void executeForwardJob(ForwardJob job) throws IOException, JSchException{
-		updateable.send(new StatusUpdate("VM Executing ForwardJob", id, VMState.EXECUTING));
+	private void executeForwardJob(ForwardJob job) throws IOException,
+			JSchException {
+		updateable.send(new StatusUpdate("VM " + id + "  Executing ForwardJob", id,
+				VMState.EXECUTING));
 
 		HashMap<Integer, String> files = new HashMap<Integer, String>();
-		String sessionName = job.getRemoteFileName(); //We highjack te session name to communicate the output file name
-		if (job.isTarForwarder()){
-			String file = FileLocations.pathForTar(job.getIP(), job.getFileName());
-			files.put(-2, file); //We highjack the fileid to communicate a ".tar.gz" with sessionName output
+		String sessionName = job.getRemoteFileName(); // We highjack te session
+														// name to communicate
+														// the output file name
+		if (job.isTarForwarder()) {
+			String file = FileLocations.pathForTar(job.getIP(),
+					job.getFileName());
+			files.put(-2, file); // We highjack the fileid to communicate a
+									// ".tar.gz" with sessionName output
 		} else {
-			String file = FileLocations.pathForOutput(job.getIP(), job.getFileName());
-			files.put(-1, file); //We highjack the fileid to communicate sessionName output
+			String file = FileLocations.pathForOutput(job.getIP(),
+					job.getFileName());
+			files.put(-1, file); // We highjack the fileid to communicate
+									// sessionName output
 		}
-		
+
 		FTPService.offer(sessionName, files);
-		
+
 		FTPService.invokeRemote(job.getIP(), sessionName);
-		
+
 		FTPService.waitForOffer(sessionName, 120000);
-		// Now that we have completed our business, clear up all the resources associated with
+		// Now that we have completed our business, clear up all the resources
+		// associated with
 		// this set of jobs.
 		if (job.isTarForwarder())
-			new File(FileLocations.pathForTar(job.getIP(), job.getFileName())).delete();
-		new File(FileLocations.pathForOutput(job.getIP(), job.getFileName())).delete();
+			new File(FileLocations.pathForTar(job.getIP(), job.getFileName()))
+					.delete();
+		new File(FileLocations.pathForOutput(job.getIP(), job.getFileName()))
+				.delete();
 		HashMap<Integer, String> fileMapping = null;
-		synchronized (fileSystem){
+		synchronized (fileSystem) {
 			fileMapping = fileSystem.remove(job.getIP());
 		}
 		for (String path : fileMapping.values())
 			new File(path).delete();
 	}
-	
-	private void executeWaitForResultsJob(WaitForResultsJob job) {
+
+	private void executeWaitForResultsJob(WaitForResultsJob job) throws IOException, JSchException {
+		updateable.send(new StatusUpdate("VM " + id + "  waiting for mid results", id,
+				VMState.EXECUTING));
+		
 		int expected = job.getExpectedCount();
-		while(new File("result").list().length < expected){}
-		File folder = new File("result");
+		while(new File("/").listFiles((new FilenameFilter() { 
+    	         public boolean accept(File dir, String filename)
+    	              { return filename.endsWith(".gif"); }
+    	} )).length < expected){}
+		File folder = new File("");
 		
 		synchronized (fileSystem){
 			if (!fileSystem.containsKey(job.getIP())){
@@ -210,8 +247,8 @@ public class JobExecutor {
 				fileMapping.put(Integer.valueOf(i.getName().replaceAll("[:.]", "").replace("gif", "")), i.getAbsolutePath());
 		}		
 	}
-	
-	private enum JobType{
+
+	private enum JobType {
 		COMBINE, COMPRESS, DOWNLOAD, FORWARD, PRESENT, PRODUCE, UNKNOWN, WAITRESULT;
 	}
 }

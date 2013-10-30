@@ -49,7 +49,7 @@ public class JobPerVMAllocator extends AbstractAllocator {
 			DownloadJob d = new DownloadJob(filelist, meta.getSender());
 			CombineJob c = new CombineJob(filelist);
 			CompressJob comp = new CompressJob();
-			ForwardJob f = new ForwardJob(true);
+			ForwardJob f = new ForwardJob(false);
 			c.setIP(meta.getSender());
 			comp.setIP(meta.getSender());
 			f.setIP(meta.getSender());
