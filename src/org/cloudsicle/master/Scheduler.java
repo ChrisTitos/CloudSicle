@@ -110,10 +110,11 @@ public class Scheduler implements Runnable {
 			DownloadJob d = new DownloadJob(filelist, meta.getSender());
 			CombineJob c = new CombineJob(filelist);
 			CompressJob comp = new CompressJob();
-			ForwardJob f = new ForwardJob(true);
+			ForwardJob f = new ForwardJob(false);
 			c.setIP(meta.getSender());
 			comp.setIP(meta.getSender());
 			f.setIP(meta.getSender());
+			f.setRemoteFileName(vm.getIp().getHostAddress()); //Have the output file be $VM_IP.tar.gz
 			list.add(d);
 			list.add(c);
 			list.add(comp);
