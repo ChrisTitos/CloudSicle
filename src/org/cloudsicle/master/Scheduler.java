@@ -1,16 +1,18 @@
 package org.cloudsicle.master;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.cloudsicle.communication.SocketSender;
 import org.cloudsicle.main.jobs.CombineJob;
 import org.cloudsicle.main.jobs.CompressJob;
 import org.cloudsicle.main.jobs.DownloadJob;
 import org.cloudsicle.main.jobs.ForwardJob;
 import org.cloudsicle.main.jobs.IJob;
+import org.cloudsicle.master.allocation.IAllocator;
+import org.cloudsicle.master.allocation.JobPerVMAllocator;
 import org.cloudsicle.master.slaves.ResourcePool;
 import org.cloudsicle.master.slaves.SlaveVM;
 import org.cloudsicle.messages.Activity;
@@ -25,6 +27,7 @@ public class Scheduler implements Runnable {
 	private ResourcePool pool;
 	private ArrayDeque<JobMetaData> metaJobQueue;
 	private Monitor monitor;
+	private IAllocator allocator;
 
 	/**
 	 * Instantiate a new Scheduler.
@@ -36,6 +39,7 @@ public class Scheduler implements Runnable {
 		this.pool = new ResourcePool();
 		this.metaJobQueue = new ArrayDeque<JobMetaData>();
 		this.monitor = monitor;
+		this.allocator = new JobPerVMAllocator(this.pool, this.monitor);
 		new Thread(this).start();
 	}
 
@@ -80,59 +84,9 @@ public class Scheduler implements Runnable {
 					JobMetaData metajob = this.metaJobQueue.pop();
 					System.out.println("DEBUG: Sheduling job of "
 							+ metajob.getSender());
-
-					SlaveVM vm = this.pool.requestVM();
-					vm.assignJob(metajob);
-					Allocation alloc = new Allocation();
-					alloc.allocate(vm, metajob.getFiles()); // for now just
-																// give
-																// everything to
-																// one vm
-					createActivity(metajob, alloc);					
+					allocator.allocate(metajob);
 				}
 			}
 		}
-	}
-	
-	private void createActivity(JobMetaData meta, Allocation alloc) {
-
-		ArrayList<IJob> list = new ArrayList<IJob>();
-		HashMap<Integer, HashMap<Integer, String>> allocs = alloc.getAllocations();
-
-		for (Integer vmId : allocs.keySet()) {
-			SlaveVM vm = this.pool.getVMById(vmId);
-			
-			SocketSender sender = new SocketSender(true, vm.getIp());
-
-			ArrayList<Integer> filelist = new ArrayList<Integer>();
-			HashMap<Integer, String> files =  allocs.get(vm.getId());
-			filelist.addAll(files.keySet());
-			DownloadJob d = new DownloadJob(filelist, meta.getSender());
-			CombineJob c = new CombineJob(filelist);
-			CompressJob comp = new CompressJob();
-			ForwardJob f = new ForwardJob(true);
-			c.setIP(meta.getSender());
-			comp.setIP(meta.getSender());
-			f.setIP(meta.getSender());
-			list.add(d);
-			list.add(c);
-			list.add(comp);
-			list.add(f);
-			
-			Activity activity = new Activity(list);
-			activity.setClient(meta.getSender());
-			activity.setVM(vm);
-
-			try {
-				System.out.println("Sending Activity to "
-						+ vm.getId() + "@" + vm.getIp().getHostAddress());
-				sender.send(activity, true);
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (JSchException e) {
-				e.printStackTrace();
-			}
-		}
-		monitor.moveJobToRunning(meta.getId());
 	}
 }

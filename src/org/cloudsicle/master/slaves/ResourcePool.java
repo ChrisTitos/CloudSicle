@@ -134,6 +134,31 @@ public class ResourcePool {
 			}
 		}
 	}
+	
+	public ArrayList<SlaveVM> requestVMs(int count){
+		ArrayList<SlaveVM> vms = new ArrayList<SlaveVM>();
+		if (vmsInUse.size() >= maxVMs)
+			return null;
+		if (vmsAvailable.size() > count) {
+			for(int i=0; i<count; i++){
+				vms.add(getAvailableVM());
+			}
+		} else {
+			try {
+				for(int i=0; i<count; i++){
+					addVM();
+				}
+				while (availableVMCount() < count) {
+				} // wait for VM to become available
+				for(int i=0; i<count; i++){
+					vms.add(getAvailableVM());
+				}
+			} catch (UninstantiableException e) {
+				return null;
+			}
+		}
+		return vms;
+	}
 
 	private SlaveVM getAvailableVM() {
 		SlaveVM vm = vmsAvailable.remove(0);
