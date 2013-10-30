@@ -169,19 +169,20 @@ public class JobExecutor {
 		updateable.send(new StatusUpdate("VM Executing ForwardJob", id, VMState.EXECUTING));
 
 		HashMap<Integer, String> files = new HashMap<Integer, String>();
+		String sessionName = job.getRemoteFileName(); //We highjack te session name to communicate the output file name
 		if (job.isTarForwarder()){
 			String file = FileLocations.pathForTar(job.getIP(), job.getFileName());
-			files.put(-2, file);
+			files.put(-2, file); //We highjack the fileid to communicate a ".tar.gz" with sessionName output
 		} else {
 			String file = FileLocations.pathForOutput(job.getIP(), job.getFileName());
-			files.put(-1, file);
+			files.put(-1, file); //We highjack the fileid to communicate sessionName output
 		}
 		
-		FTPService.offer(files);
+		FTPService.offer(sessionName, files);
 		
-		FTPService.invokeRemote(job.getIP(), FTPService.sessionFromFiles(files));
+		FTPService.invokeRemote(job.getIP(), sessionName);
 		
-		FTPService.waitForOffer(FTPService.sessionFromFiles(files), 120000);
+		FTPService.waitForOffer(sessionName, 120000);
 		// Now that we have completed our business, clear up all the resources associated with
 		// this set of jobs.
 		if (job.isTarForwarder())

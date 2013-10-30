@@ -11,6 +11,7 @@ public class ForwardJob extends AbstractJob implements Serializable {
 
 	private final boolean compressed; 
 	private final String name;
+	private String remoteFileName;
 	
 	/**
 	 * Forward the results to the sender of this message.
@@ -55,6 +56,26 @@ public class ForwardJob extends AbstractJob implements Serializable {
 	 */
 	public boolean isGifForwarder(){
 		return !compressed;
+	}
+
+	/**
+	 * Get the filename as it should appear on the receiving end
+	 * after forwarding.
+	 * 
+	 * @return The remote file name
+	 */
+	public String getRemoteFileName() {
+		return remoteFileName;
+	}
+
+	/**
+	 * Set the filename as it should appear on the remote
+	 * system.
+	 * 
+	 * @param remoteFileName The file name to set
+	 */
+	public void setRemoteFileName(String remoteFileName) {
+		this.remoteFileName = remoteFileName;
 	}
 
 }

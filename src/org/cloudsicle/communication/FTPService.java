@@ -299,13 +299,24 @@ public class FTPService {
 				System.out.print("DEBUG: Downloading fileid " + fileid + " (" + filesize + " bytes).. ");
 				
 				//Write the specified amount of bytes to the output file associated with this fileid
-				FileOutputStream fos = new FileOutputStream(outputFolder + fileid + ".gif");
+				String outFilename = "";
+				if (!session.startsWith(",") && fileid == -1){
+					//Special session, produce gif with sessionname
+					outFilename = outputFolder + session + ".gif";
+				} else if (!session.startsWith(",") && fileid == -2){
+					//Special session, produce tar.gz with sessionname
+					outFilename = outputFolder + session + ".tar.gz";
+				} else {
+					//Regular session
+					outFilename = outputFolder + fileid + ".gif";
+				}
+				FileOutputStream fos = new FileOutputStream(outFilename);
 				for (long i = 0; i < filesize; i++)
 					fos.write(is.read());
 				fos.close();
 				
 				System.out.println("DONE!");
-				System.out.println("DEBUG: Stored in " + outputFolder + fileid + ".gif");
+				System.out.println("DEBUG: Stored in " + outFilename);
 			}
 			oos.close();
 			is.close();
