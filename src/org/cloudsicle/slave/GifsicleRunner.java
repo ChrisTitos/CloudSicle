@@ -63,7 +63,11 @@ public class GifsicleRunner {
 	 */
 	private boolean runCommand(String cmd) {
 		try {
-			Process p = Runtime.getRuntime().exec(cmd);
+			String[] bashCmd = {
+					"/bin/sh",
+					"-c",
+					cmd};
+			Process p = Runtime.getRuntime().exec(bashCmd);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
 					p.getInputStream()));
 			String line = reader.readLine();
