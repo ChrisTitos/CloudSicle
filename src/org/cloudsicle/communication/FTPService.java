@@ -16,6 +16,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -289,8 +290,12 @@ public class FTPService {
 			while (true){
 				byte[] b_fileid = new byte[4];
 				byte[] b_filesize = new byte[8];
-				if (is.read(b_fileid) == -1)
-					break; // EOF
+				try{
+					if (is.read(b_fileid) == -1)
+						break; // Soft EOF
+				} catch (SocketException e){
+					break; // Hard EOF (for directUpload)
+				}
 				is.read(b_filesize);
 				
 				int fileid = ByteBuffer.wrap(b_fileid).getInt();
@@ -314,6 +319,9 @@ public class FTPService {
 				for (long i = 0; i < filesize; i++)
 					fos.write(is.read());
 				fos.close();
+				
+				//Flag file complete
+				outStream.write(0x01);
 				
 				System.out.println("DONE!");
 				System.out.println("DEBUG: Stored in " + outFilename);
@@ -406,6 +414,9 @@ public class FTPService {
 			fis.close();
 			System.out.println("DEBUG: Done sending file");
 			os.flush();
+			
+			int flag = is.read();
+			System.out.println("DEBUG: Downloader sent flag: " + flag);
 		}
 		System.out.println("DEBUG: Finished session \"" + session + "\"");
 		return null;
@@ -433,12 +444,7 @@ public class FTPService {
 			oos.flush();
 			
 			directUploadSession(is, os);
-			
-			while (!s.isInputShutdown())
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {}
-			
+
 			s.close();
 		} catch (IOException e) {
 			e.printStackTrace();
