@@ -53,6 +53,7 @@ public class JobPerVMAllocator extends AbstractAllocator {
 			c.setIP(meta.getSender());
 			comp.setIP(meta.getSender());
 			f.setIP(meta.getSender());
+			f.setRemoteFileName(vm.getIp().getHostAddress());
 			list.add(d);
 			list.add(c);
 			list.add(comp);

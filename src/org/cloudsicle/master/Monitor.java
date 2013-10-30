@@ -57,7 +57,8 @@ public class Monitor {
 		for(JobMetaData job : finishedJobs.values()){
 			totaltime += (job.getEndtime() - job.getStarttime());
 		}
-		long average = totaltime / finishedJobs.size();
+		long average = 0;
+		if(finishedJobs.size() > 0) average = totaltime / finishedJobs.size();
 		status += "Average running time of jobs: " + average + " ms";
 		return status;
 	}
