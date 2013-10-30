@@ -59,7 +59,7 @@ public class Monitor {
 		}
 		long average = 0;
 		if(finishedJobs.size() > 0) average = totaltime / finishedJobs.size();
-		status += "Average running time of jobs: " + average + " ms";
+		status += "Average running time of jobs: " + (average /1000) + " s";
 		return status;
 	}
 }

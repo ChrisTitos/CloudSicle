@@ -3,6 +3,7 @@ package org.cloudsicle.master;
 import java.util.ArrayDeque;
 
 import org.cloudsicle.master.allocation.IAllocator;
+import org.cloudsicle.master.allocation.JobPerVMAllocator;
 import org.cloudsicle.master.allocation.SplitJobAllocator;
 import org.cloudsicle.master.slaves.ResourcePool;
 import org.cloudsicle.master.slaves.SlaveVM;
@@ -26,7 +27,7 @@ public class Scheduler implements Runnable {
 		this.pool = new ResourcePool();
 		this.metaJobQueue = new ArrayDeque<JobMetaData>();
 		this.monitor = monitor;
-		this.allocator = new SplitJobAllocator(this.pool, this.monitor);
+		this.allocator = new JobPerVMAllocator(this.pool, this.monitor);
 		new Thread(this).start();
 	}
 
