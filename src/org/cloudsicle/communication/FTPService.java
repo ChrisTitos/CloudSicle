@@ -19,6 +19,8 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -73,6 +75,7 @@ public class FTPService {
 	 * @return A unique session id
 	 */
 	public static String sessionFromFiles(List<Integer> files){
+		Collections.sort(files);
 		String out = "";
 		for (Integer i : files)
 			out += "," + i;
@@ -87,10 +90,9 @@ public class FTPService {
 	 * @return A unique session id
 	 */
 	public static String sessionFromFiles(HashMap<Integer,String> mapping){
-		String out = "";
-		for (Integer i : mapping.keySet())
-			out += "," + i;
-		return out;
+		List<Integer> files = new ArrayList<Integer>();
+		files.addAll(mapping.keySet());
+		return sessionFromFiles(files);
 	}
 	
 	/**
