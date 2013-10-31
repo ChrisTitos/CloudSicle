@@ -2,9 +2,9 @@ package org.cloudsicle.messages;
 
 import java.net.InetAddress;
 import java.util.HashMap;
-import java.util.List;
 
 import org.cloudsicle.communication.INeedOwnIP;
+import org.cloudsicle.main.jobs.JobType;
 
 /**
  * The JobMetaData is presented to the master by the client so that the master can allocate
@@ -23,6 +23,13 @@ public class JobMetaData extends AbstractMessage implements INeedOwnIP {
 	
 	private long starttime;
 	private long endtime;
+	private HashMap<JobType,Long> jobtimes;
+	
+	public JobMetaData(){
+		super();
+		jobtimes = new HashMap<JobType, Long>();
+		
+	}
 	
 	public void setId(int id){
 		this.id = id;
@@ -72,6 +79,7 @@ public class JobMetaData extends AbstractMessage implements INeedOwnIP {
 
 	public void setStarttime(long starttime) {
 		this.starttime = starttime;
+		startingJob(JobType.WAITING);
 	}
 
 	public long getEndtime() {
@@ -80,6 +88,11 @@ public class JobMetaData extends AbstractMessage implements INeedOwnIP {
 
 	public void setEndtime(long endtime) {
 		this.endtime = endtime;
+	}
+	
+	public void startingJob(JobType type){
+		if(!jobtimes.containsKey(type))
+			jobtimes.put(type, System.currentTimeMillis());
 	}
 
 

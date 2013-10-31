@@ -78,4 +78,9 @@ public class ForwardJob extends AbstractJob implements Serializable {
 		this.remoteFileName = remoteFileName;
 	}
 
+	@Override
+	public JobType getJobType() {
+		return JobType.FORWARD;
+	}
+
 }

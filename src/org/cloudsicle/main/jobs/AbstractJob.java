@@ -4,7 +4,7 @@ import java.net.InetAddress;
 
 import org.cloudsicle.communication.INeedOwnIP;
 
-public class AbstractJob implements IJob, INeedOwnIP {
+public abstract class AbstractJob implements IJob, INeedOwnIP {
 	
 	private int metaJob;
 	protected InetAddress ip;

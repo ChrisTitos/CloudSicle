@@ -14,4 +14,9 @@ public class WaitForResultsJob extends AbstractJob implements Serializable {
 		return expectedFiles;
 	}
 
+	@Override
+	public JobType getJobType() {
+		return JobType.WAITRESULT;
+	}
+
 }

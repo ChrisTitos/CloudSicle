@@ -18,6 +18,7 @@ import org.cloudsicle.main.jobs.CompressJob;
 import org.cloudsicle.main.jobs.DownloadJob;
 import org.cloudsicle.main.jobs.ForwardJob;
 import org.cloudsicle.main.jobs.IJob;
+import org.cloudsicle.main.jobs.JobType;
 import org.cloudsicle.main.jobs.WaitForResultsJob;
 import org.cloudsicle.messages.StatusUpdate;
 import org.kamranzafar.jtar.TarEntry;
@@ -246,9 +247,5 @@ public class JobExecutor {
 			for (File i : folder.listFiles())
 				fileMapping.put(Integer.valueOf(i.getName().replaceAll("[:.]", "").replace("gif", "")), i.getAbsolutePath());
 		}		
-	}
-
-	private enum JobType {
-		COMBINE, COMPRESS, DOWNLOAD, FORWARD, PRESENT, PRODUCE, UNKNOWN, WAITRESULT;
 	}
 }

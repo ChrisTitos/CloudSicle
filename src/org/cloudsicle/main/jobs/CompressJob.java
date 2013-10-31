@@ -38,4 +38,9 @@ public class CompressJob extends AbstractJob implements Serializable {
 		f.createNewFile();
 		return out;
 	}
+
+	@Override
+	public JobType getJobType() {
+		return JobType.COMPRESS;
+	}
 }

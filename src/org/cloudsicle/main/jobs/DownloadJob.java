@@ -44,4 +44,10 @@ public class DownloadJob extends AbstractJob implements Serializable {
 	public void setUploaderIP(InetAddress uploaderIP) {
 		this.uploaderIP = uploaderIP;
 	}
+
+	@Override
+	public JobType getJobType() {
+		return JobType.DOWNLOAD;
+	}
+	
 }

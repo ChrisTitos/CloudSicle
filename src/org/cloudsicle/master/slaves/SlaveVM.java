@@ -182,8 +182,7 @@ public class SlaveVM {
 			session.disconnect();
 			return true;
 		} catch (JSchException e) {
-			System.out.println("No SSH possible to " + ip + ", "
-					+ e.getMessage());
+		
 			return false;
 		}
 

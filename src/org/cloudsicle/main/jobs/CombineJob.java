@@ -49,4 +49,9 @@ public class CombineJob extends AbstractJob implements Serializable {
 		f.createNewFile();
 		return out;
 	}
+
+	@Override
+	public JobType getJobType() {
+		return JobType.COMBINE;
+	}
 }

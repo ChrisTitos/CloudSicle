@@ -2,6 +2,7 @@ package org.cloudsicle.master.slaves;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.cloudsicle.main.VMState;
 import org.opennebula.client.Client;
@@ -16,7 +17,7 @@ public class ResourcePool {
 	private int maxVMs;
 
 	private ArrayList<SlaveVM> vmsInUse = new ArrayList<SlaveVM>();
-	private ArrayList<SlaveVM> vmsAvailable = new ArrayList<SlaveVM>();
+	private ConcurrentLinkedQueue<SlaveVM> vmsAvailable = new ConcurrentLinkedQueue<SlaveVM>();
 	private HashMap<Integer, SlaveVM> allVms = new HashMap<Integer, SlaveVM>();
 
 	private static int VM_TIMEOUT = 6000;
@@ -72,7 +73,7 @@ public class ResourcePool {
 						+ slave.getVm().stateStr());
 				while (!slave.testConnection()) {
 					try {
-						Thread.sleep(2000);
+						Thread.sleep(1000);
 					} catch (InterruptedException e) {
 					}
 				}
@@ -102,7 +103,7 @@ public class ResourcePool {
 	 * @throws UnreachableVMException
 	 *             If we could not reach the VM to tell them to shut down
 	 */
-	public void removeVM(SlaveVM vm) throws UnreachableVMException {
+	public synchronized void removeVM(SlaveVM vm) throws UnreachableVMException {
 		System.out.println("DEBUG: VM " + vm.getId() + " is deleted");
 		if (vmsInUse.contains(vm))
 			vmsInUse.remove(vm);
@@ -118,7 +119,7 @@ public class ResourcePool {
 	 * @return A Slave VM to work on, or null if we have to wait for a VM to
 	 *         start up
 	 */
-	public SlaveVM requestVM() {
+	public synchronized SlaveVM requestVM() {
 		if (vmsInUse.size() >= maxVMs)
 			return null;
 		if (vmsAvailable.size() > 0) {
@@ -126,31 +127,33 @@ public class ResourcePool {
 		} else {
 			try {
 				addVM();
-				while (availableVMCount() < 1) {
-				} // wait for VM to become available
-				return getAvailableVM();
+				synchronized (vmsAvailable) {
+					while (availableVMCount() < 1) {
+					} // wait for VM to become available
+					return getAvailableVM();
+				}
 			} catch (UninstantiableException e) {
 				return null;
 			}
 		}
 	}
-	
-	public ArrayList<SlaveVM> requestVMs(int count){
+
+	public ArrayList<SlaveVM> requestVMs(int count) {
 		ArrayList<SlaveVM> vms = new ArrayList<SlaveVM>();
 		if (vmsInUse.size() >= maxVMs)
 			return null;
 		if (vmsAvailable.size() > count) {
-			for(int i=0; i<count; i++){
+			for (int i = 0; i < count; i++) {
 				vms.add(getAvailableVM());
 			}
 		} else {
 			try {
-				for(int i=0; i<(count - availableVMCount()); i++){
+				for (int i = 0; i < (count - availableVMCount()); i++) {
 					addVM();
 				}
 				while (availableVMCount() < count) {
 				} // wait for VM to become available
-				for(int i=0; i<count; i++){
+				for (int i = 0; i < count; i++) {
 					vms.add(getAvailableVM());
 				}
 			} catch (UninstantiableException e) {
@@ -160,8 +163,8 @@ public class ResourcePool {
 		return vms;
 	}
 
-	private SlaveVM getAvailableVM() {
-		SlaveVM vm = vmsAvailable.remove(0);
+	private synchronized SlaveVM getAvailableVM() {
+		SlaveVM vm = vmsAvailable.poll();
 		vmsInUse.add(vm);
 		return vm;
 	}
@@ -187,10 +190,12 @@ public class ResourcePool {
 					Thread.sleep(ResourcePool.VM_TIMEOUT);
 				} catch (InterruptedException e) {
 				}
-				// always keep one VM alive
-				if (availableVMCount() > 1) { 
+				synchronized (vmsAvailable) {
+					// always keep one VM alive
+					if (availableVMCount() > 1) {
 
-					removeVM(allVms.get(id));
+						removeVM(allVms.get(id));
+					}
 				}
 			}
 		};
@@ -198,9 +203,13 @@ public class ResourcePool {
 
 	}
 
-	private synchronized int availableVMCount() {
+	public synchronized int availableVMCount() {
 		int size = this.vmsAvailable.size();
 		return size;
+	}
+	
+	public synchronized int inUseVMCount(){
+		return this.vmsInUse.size();
 	}
 
 	/**
