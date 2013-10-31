@@ -96,7 +96,7 @@ public class JobExecutor {
 	private void executeCombineJob(CombineJob job) throws IOException,
 			JSchException {
 		updateable.send(new StatusUpdate("VM " + id + " Executing CombineJob", id,
-				VMState.EXECUTING));
+				VMState.EXECUTING, JobType.COMBINE));
 
 		GifsicleRunner program = new GifsicleRunner();
 		program.setDelay(1);
@@ -122,7 +122,7 @@ public class JobExecutor {
 	private void executeCompressJob(CompressJob job) throws IOException,
 			JSchException {
 		updateable.send(new StatusUpdate("VM " + id + " Executing CompressJob", id,
-				VMState.EXECUTING));
+				VMState.EXECUTING, JobType.COMPRESS));
 
 		File output = new File(job.conjureOutputFile());
 		File input = new File(FileLocations.pathForOutput(job.getIP(),
@@ -155,7 +155,7 @@ public class JobExecutor {
 	private void executeDownloadJob(DownloadJob job) throws IOException,
 			JSchException {
 		updateable.send(new StatusUpdate("VM " + id + "  Executing DownloadJob", id,
-				VMState.EXECUTING));
+				VMState.EXECUTING, JobType.DOWNLOAD));
 
 		boolean success = FTPService.downloadSock(job.getUploaderIP(),
 				job.getSession(),
@@ -189,7 +189,7 @@ public class JobExecutor {
 	private void executeForwardJob(ForwardJob job) throws IOException,
 			JSchException {
 		updateable.send(new StatusUpdate("VM " + id + "  Executing ForwardJob", id,
-				VMState.EXECUTING));
+				VMState.EXECUTING, JobType.FORWARD));
 
 		HashMap<Integer, String> files = new HashMap<Integer, String>();
 		String sessionName = job.getRemoteFileName(); // We highjack te session
@@ -230,7 +230,7 @@ public class JobExecutor {
 
 	private void executeWaitForResultsJob(WaitForResultsJob job) throws IOException, JSchException {
 		updateable.send(new StatusUpdate("VM " + id + "  waiting for mid results", id,
-				VMState.EXECUTING));
+				VMState.EXECUTING, JobType.WAITRESULT));
 		
 		int expected = job.getExpectedCount();
 		while(new File("/").listFiles((new FilenameFilter() { 

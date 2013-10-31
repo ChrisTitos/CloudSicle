@@ -2,6 +2,7 @@ package org.cloudsicle.master;
 
 import java.util.ArrayDeque;
 
+import org.cloudsicle.main.jobs.JobType;
 import org.cloudsicle.master.allocation.IAllocator;
 import org.cloudsicle.master.allocation.JobPerVMAllocator;
 import org.cloudsicle.master.slaves.ResourcePool;
@@ -52,6 +53,11 @@ public class Scheduler implements Runnable {
 		this.monitor.moveJobToFinished(vm.getAssignedJob());
 		pool.releaseVM(vm);
 
+	}
+	
+	public void vmStatus(int vmId, JobType jt){
+		SlaveVM vm = pool.getVMById(vmId);
+		this.monitor.jobStatus(vm.getAssignedJob(), jt);
 	}
 	
 	public void hardExit(){

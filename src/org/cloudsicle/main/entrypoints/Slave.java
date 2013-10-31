@@ -18,6 +18,7 @@ import org.cloudsicle.communication.SocketListener;
 import org.cloudsicle.communication.SocketSender;
 import org.cloudsicle.main.VMState;
 import org.cloudsicle.main.jobs.IJob;
+import org.cloudsicle.main.jobs.JobType;
 import org.cloudsicle.messages.Activity;
 import org.cloudsicle.messages.IMessage;
 import org.cloudsicle.messages.SoftExit;
@@ -194,7 +195,7 @@ public class Slave implements IMessageHandler{
 				System.exit(0);
 			} else {
 				try {
-					updateable.send(new StatusUpdate("VM " + id + " Done processing all jobs.", id, VMState.DONE));
+					updateable.send(new StatusUpdate("VM " + id + " Done processing all jobs.", id, VMState.DONE, JobType.WAITING));
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (JSchException e) {

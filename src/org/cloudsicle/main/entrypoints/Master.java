@@ -47,7 +47,7 @@ public class Master implements IMessageHandler {
 			this.scheduler.schedule(meta);
 		} else if (message instanceof StatusUpdate) {
 			StatusUpdate update = (StatusUpdate) message;
-			System.out.println((update).getMessage());
+			System.out.println(update.getMessage());
 			
 			if(update.getState() == VMState.DONE){
 				System.out.println(update.getVmId() + " saying he is done");
@@ -56,6 +56,8 @@ public class Master implements IMessageHandler {
 				System.out.println(update.getVmId() + " has failed");
 				this.scheduler.vmFailed(update.getVmId());
 			}
+			
+			this.scheduler.vmStatus(update.getVmId(), update.getJobType());
 		}
 	}
 

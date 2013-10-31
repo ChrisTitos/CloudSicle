@@ -1,6 +1,7 @@
 package org.cloudsicle.messages;
 
 import java.net.InetAddress;
+import java.util.EnumMap;
 import java.util.HashMap;
 
 import org.cloudsicle.communication.INeedOwnIP;
@@ -23,11 +24,11 @@ public class JobMetaData extends AbstractMessage implements INeedOwnIP {
 	
 	private long starttime;
 	private long endtime;
-	private HashMap<JobType,Long> jobtimes;
+	private EnumMap<JobType,Long> jobtimes;
 	
 	public JobMetaData(){
 		super();
-		jobtimes = new HashMap<JobType, Long>();
+		jobtimes = new EnumMap<JobType, Long>(JobType.class);
 		
 	}
 	
@@ -93,6 +94,10 @@ public class JobMetaData extends AbstractMessage implements INeedOwnIP {
 	public void startingJob(JobType type){
 		if(!jobtimes.containsKey(type))
 			jobtimes.put(type, System.currentTimeMillis());
+	}
+	
+	public EnumMap<JobType,Long> getJobTimes(){
+		return this.jobtimes;
 	}
 
 

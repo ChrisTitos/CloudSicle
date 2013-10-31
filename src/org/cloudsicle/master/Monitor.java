@@ -1,11 +1,18 @@
 package org.cloudsicle.master;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.cloudsicle.main.jobs.JobType;
 import org.cloudsicle.master.slaves.ResourcePool;
 import org.cloudsicle.messages.JobMetaData;
 
@@ -70,6 +77,13 @@ public class Monitor implements Runnable {
 		return job;
 	}
 	
+	public void jobStatus(int id, JobType jt){
+		if (runningJobs.containsKey(id))
+			runningJobs.get(id).startingJob(jt);
+		else if (finishedJobs.containsKey(id))
+			finishedJobs.get(id).startingJob(jt);
+	}
+	
 	public void finalize(){
 		writer.close();
 	}
@@ -86,8 +100,36 @@ public class Monitor implements Runnable {
 		long average = 0;
 		if (finishedJobs.size() > 0)
 			average = totaltime / finishedJobs.size();
-		status += "Average running time of jobs: " + (average / 1000) + " s";
+		status += "Average running time of jobs: " + (average / 1000) + " s\n";
+		if (finishedJobs.size() > 0)
+			for (Entry<JobType, Long> entry : totalTimesForJobs().entrySet()){
+				status += "> Spent " + entry.getKey().name() + ": " + (entry.getValue()/finishedJobs.size()) + " ms\n";
+			}
 		return status;
+	}
+	
+	private EnumMap<JobType, Long> totalTimesForJobs(){
+		EnumMap<JobType, Long> out = new EnumMap<JobType, Long>(JobType.class);
+		out.put(JobType.COMBINE, 0l);
+		out.put(JobType.COMPRESS, 0l);
+		out.put(JobType.DOWNLOAD, 0l);
+		out.put(JobType.FORWARD, 0l);
+		out.put(JobType.UNKNOWN, 0l);
+		out.put(JobType.WAITING, 0l);
+		out.put(JobType.WAITRESULT, 0l);
+		for (JobMetaData job : finishedJobs.values()) {
+			EnumMap<JobType,Long> jobTimes = job.getJobTimes();
+			List<Long> values = new ArrayList<Long>();
+			values.addAll(jobTimes.values());
+	        Collections.sort(values);
+			for (Entry<JobType, Long> entry : jobTimes.entrySet()){
+				int ourTimeIndex = Collections.binarySearch(values, entry.getValue());
+				long time = ourTimeIndex == values.size()-1 ? job.getEndtime() - entry.getValue() :
+					values.get(ourTimeIndex+1) - entry.getValue();
+				out.put(entry.getKey(), out.get(entry.getKey()) + time);
+			}
+		}
+		return out;
 	}
 
 	@Override
