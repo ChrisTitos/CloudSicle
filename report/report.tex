@@ -332,6 +332,13 @@ What we can also observe is that compression time takes up
 a larger percentage of the job time as it gets bigger, waiting
 time and combination time stay about the same and forward time shrinks percentually.
 
+We expected the forward time and waiting time to be more or less constant
+with regard to the input size. We see in \autoref{fig:makespanexpl} however,
+that the waiting time grows with the input size. Upon further investigation
+it appeared that this is caused due to the increased time the Client
+needs to send his JobMetaData. The time JobMetaData spends in the waiting
+queue is virtually the same.
+
 \begin{figure}[h]
 \begin{center}
  \includegraphics[trim=0 0 0 0,keepaspectratio=true,scale=0.8]{makespan}
