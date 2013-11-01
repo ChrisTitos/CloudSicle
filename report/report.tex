@@ -526,6 +526,15 @@ higher (and therefore the cost would be much lower).
 
 \section{Conclusion}
 \label{sec:concl}
+CloudSicle has been our attempt at creating a well scaling Cloud service.
+This report has shown the fairly robust framework of CloudSicle with support
+for advanced allocation strategies, which are currently not available for
+the project. We have shown how our simple scheme performs and how
+it is well suited for processing large datasets per client. We have also
+shown how responsive CloudSicle is to new requests and the drawback of
+resource waste that comes with it. We note how CloudSicle is a robust
+framework and that it would benefit greatly from more advanced allocation
+strategies being used for it, as the current results leave room for improvement.
 
 \section*{Acknowledgments}
 \noindent The authors would like to acknowledge the guidance of A. Iosup and
@@ -538,9 +547,11 @@ accounts were needed.
 \begin{appendices}
 \section{Time Sheet}
 This section contains the times spent on various things while developing
-and testing CloudSicle. It also contains times per experiment.
+and testing CloudSicle in \autoref{tab:timetot}. It also contains times per experiment 
+(\autoref{tab:timee1} for experiment 1 and \autoref{tab:timee2} for experiment 2).
 \begin{table}[htb]
 \caption{Totaltime}
+\label{tab:timetot}
 \begin{center}
 {\tt
 \begin{tabular}{|c|c|}
@@ -559,6 +570,7 @@ wasted-time&0\\\hline
 \end{table}
 \begin{table}[htb]
 \caption{Experiment 1 Time}
+\label{tab:timee1}
 \begin{center}
 {\tt
 \begin{tabular}{|c|c|}
@@ -572,6 +584,7 @@ setup-time&4\\\hline
 \end{table}
 \begin{table}[htb]
 \caption{Experiment 2 Time}
+\label{tab:timee2}
 \begin{center}
 {\tt
 \begin{tabular}{|c|c|}
