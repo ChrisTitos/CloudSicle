@@ -1,7 +1,6 @@
 bin/*
 dist/*
 !dist/generate_test.sh
-report/report.pdf
 report/report.aux
 report/report.log
 report/report.out
