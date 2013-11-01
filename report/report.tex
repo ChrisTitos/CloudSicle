@@ -413,6 +413,48 @@ The second half of this section will deal with the extrapolation of these result
 \subsection{Extrapolation}
 %Among others, use extrapolation on the results, as reported in Section 6.b of the report, to discuss the charged time and
 %charged cost reported in section for 100,000/1,000,000/10,000,000 users and for 1 day/1 month/1 year. 
+As discussed in the introduction of this report, we assume the average CloudSicle job to contain 100 files on average.
+Given the calculated cost per file from \autoref{tab:makespans} we can calculate the costs for 100 thousand, 1 million and 10 million users.
+For these calculations we assume have set the maximum amount of Slaves to 20.
+The result of these calculations is given in \autoref{tab:extracharge}, we note that because we have
+not tested the splitting of jobs the increase with the amount of users is linear.
+
+\begin{table}[htb]
+\caption{Extrapolated Charge Time \& Cost}
+\label{tab:extracharge}
+\begin{center}
+{\tt
+\begin{tabular}{|c||c|c|}
+\hline
+Users (Millions)&Time (Hours)&Cost(EUR)\\\hline\hline
+0.1&206&420\\\hline
+1&2056&4120\\\hline
+10&20556&41120\\\hline
+\end{tabular}
+} 
+\end{center}
+\end{table}
+
+For all of the possible combinations of days, weeks, months and years in combination
+with millions of users we can also calculate the cost. If we filter out the impossible
+amounts of hours per timeframe we get the results of \autoref{tab:extracost}.
+
+\begin{table}[htb]
+\caption{Extrapolated Cost Per Day}
+\label{tab:extracost}
+\begin{center}
+{\tt
+\begin{tabular}{|c|c||c|}
+\hline
+Users (Millions)&Per&Cost(EUR)\\\hline\hline
+0.1&Month&471\\\hline
+0.1&Year&1254\\\hline
+1&Year&4790\\\hline
+\end{tabular}
+} 
+\end{center}
+\end{table}
+
 
 \section{Conclusion}
 \label{sec:concl}
