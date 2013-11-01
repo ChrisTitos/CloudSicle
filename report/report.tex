@@ -191,7 +191,7 @@ Requests are scheduled in a first come first serve manner. We have defined two a
 
 The ForwardJob of the "intermediate" Slaves will pass the result to the Slave that is designated by the Master to produce the final results. This final Slave will use the WaitForResults job to wait until all other Slaves have sent their partial results. It will then combine and compress as usual and forward the final result to the Client.
 
-This approach bears similarity to a MapReduce computation.
+This approach bears similarity to a MapReduce computation \cite{MapReduce}.
 Depending on the strategy an arbitrary amount of distinct
 layers can be introduced. This means CloudSicle can simulate
 a MapReduce computation with two distinct mapping layers for
@@ -398,7 +398,7 @@ One of the most important requirements of CloudSicle is the autoscaling of VM re
 \autoref{fig:scaling} shows the scaling of the resources over time. We see the total amount of VMs in the systems scales well with the number of jobs running. There is a nice buffer of available VMs, especially during periods where there are multiple VMs running at the same time. This would suggest that during consistent high request levels, CloudSicle will scale up accordingly. Scaling down is also shown in intervals 404 to 443. Another observation is the fact that jobs rarerely stay in the job queue of the Scheduler for more than a second.
 
 
-\begin{figure*}[b]
+\begin{figure*}[ht]
 \begin{center}
 \begin{adjustwidth}{}{}
   \resizebox{\textwidth}{!}{%
@@ -456,13 +456,78 @@ Cost per request & \euro{0,03} \\
 
 \section{Evaluation}
 \label{sec:eval}
+In this section the evaluation of the experimental results as given in \autoref{sec:setup} will be discussed.
+First the observed and inferred results of the two experiments we performed will be discussed.
+The second half of this section will deal with the extrapolation of these results.
+
+\subsection{Results}
+%summarize the main findings of your work and discuss the tradeoffs inherent in the design of
+%cloud-computing-based applications.Should the WantCloud CTO use IaaS-based clouds?
+
+\subsection{Extrapolation}
+%Among others, use extrapolation on the results, as reported in Section 6.b of the report, to discuss the charged time and
+%charged cost reported in section for 100,000/1,000,000/10,000,000 users and for 1 day/1 month/1 year. 
+As discussed in the introduction of this report, we assume the average CloudSicle job to contain 100 files on average.
+Given the calculated cost per file from \autoref{tab:makespans} we can calculate the costs for 100 thousand, 1 million and 10 million users.
+For these calculations we assume have set the maximum amount of Slaves to 20.
+The result of these calculations is given in \autoref{tab:extracharge}, we note that because we have
+not tested the splitting of jobs the increase with the amount of users is linear.
+
+\begin{table}[htb]
+\caption{Extrapolated Charge Time \& Cost}
+\label{tab:extracharge}
+\begin{center}
+{\tt
+\begin{tabular}{|c||c|c|}
+\hline
+Users (Millions)&Time (Hours)&Cost(EUR)\\\hline\hline
+0.1&206&420\\\hline
+1&2056&4120\\\hline
+10&20556&41120\\\hline
+\end{tabular}
+} 
+\end{center}
+\end{table}
+
+For all of the possible combinations of days, weeks, months and years in combination
+with millions of users we can also calculate the cost. If we filter out the impossible
+amounts of hours per timeframe we get the results of \autoref{tab:extracost}.
+These calculation assume the worst case scenario where Virtual Machines get
+all of their work at once and the rest of the time the buffer Virtual Machine
+remains powered on. This causes maximum inefficiency in CloudSicle's buffering
+scheme.
+
+\begin{table}[htb]
+\caption{Extrapolated Cost Per Day}
+\label{tab:extracost}
+\begin{center}
+{\tt
+\begin{tabular}{|c|c||c|}
+\hline
+Users (Millions)&Per&Cost(EUR)\\\hline\hline
+0.1&Month&471\\\hline
+0.1&Year&1254\\\hline
+1&Year&4790\\\hline
+\end{tabular}
+} 
+\end{center}
+\end{table}
+
+We note that the implementation of the SplitJob would drastically change the
+outcome of these calculations. If Virtual Machines are able to balance loads and
+continuously accept activities, the throughput of the system would be much
+higher (and therefore the cost would be much lower).
 
 \section{Conclusion}
 \label{sec:concl}
 
 \section*{Acknowledgments}
-The authors would like to acknowledge the suggestions of many people.
-
+\noindent The authors would like to acknowledge the guidance of A. Iosup and
+D. Epema in exploring the world of Cloud Computing and offering
+the authors the chance to interact with the DAS-4 system.
+The authors would also like to acknowledge B. Ghit for his interactions
+when the authors were unable to log in to DAS-4 and also when OpenNebula
+accounts were needed.
 
 \nocite{*}
 \bibliographystyle{IEEE}
@@ -475,9 +540,21 @@ The authors would like to acknowledge the suggestions of many people.
 %
 \begin{thebibliography}{1}
 \bibitem{gifsicle}
-Eddie Kohler
+Kohler, E.
 \newblock {\em Gifsicle: Command-Line Animated GIFs},
 \newblock {\url{http://www.lcdf.org/gifsicle/}},
+\newblock {Last retrieved October 30 2013}
+
+\bibitem{MapReduce}
+Dean, J., \& Ghemawat, S.  
+\newblock {2008}.
+\newblock {\em MapReduce: simplified data processing on large clusters}. 
+\newblock {Communications of the ACM, 51(1), 107-113}.
+
+\bibitem{das4}
+University of Amsterdam
+\newblock {\em DAS-4 Overview},
+\newblock {\url{http://www.cs.vu.nl/das4/}},
 \newblock {Last retrieved October 30 2013}
 
 \bibitem{opennebulaapi}
@@ -486,11 +563,6 @@ Open Nebula
 \newblock {\url{http://opennebula.org/documentation:archives:rel2.0:java}},
 \newblock {Last retrieved October 30 2013}
 
-\bibitem{das4}
-University of Amsterdam
-\newblock {\em DAS-4 Overview},
-\newblock {\url{http://www.cs.vu.nl/das4/}},
-\newblock {Last retrieved October 30 2013}
 \end{thebibliography}
 %
 %%---------------------------------------------------------------------------%%
