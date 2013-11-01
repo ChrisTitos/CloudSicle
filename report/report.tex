@@ -8,6 +8,9 @@
 \usepackage{tabularx}
 \usepackage[official]{eurosym}
 
+\widowpenalties 1 10000
+\raggedbottom
+
 \def\sectionautorefname{Section}
 \def\figureautorefname{Figure}
 
@@ -82,13 +85,14 @@ design and concept, which can be used to provide a \textit{.gif}
 creation service to other businesses. The need of the future.
 
 The structure of this report will be as follows:
+\begin{samepage}
 \begin{itemize}
 \item In \autoref{sec:require} we will lay out our requirements.
 \item \autoref{sec:design} will explain the design of CloudSicle as well as some implementation details.
 \item We evaluate CloudSicle with a number of experiments shown in \autoref{sec:eval}
 \item In \autoref{sec:eval} we will discuss the main findings of our work as well as the trade-offs of using CloudSicle.
 \end{itemize}
-
+\end{samepage}
 \section{Requirements}
 \label{sec:require}
 In this section we will first provide some background information concerning CloudSicle. Following this we will list the requirements we have formulated  together with \textbf{WantCloud BV}.
