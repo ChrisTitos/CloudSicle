@@ -179,7 +179,7 @@ We already mentioned the short nature of the jobs that CloudSicle requests have.
 To ensure scaling down, after a VM is done with an Activity, the Master will wait a certain amount of time before shutting down the VM and removing it from the Resource Pool. Note that this only happens when a VM is done with an Activity. If it has yet to execute something, it will remain active. Because we always have at least one VM in the pool, and jobs are short, making the need for extra VMs low, the timeout can be very short. In  our proof of concept implementation, we set this time out to 6 seconds. In our experiments we show that this value yields good results.
 
 \subsection{Job Allocation}
-We have defined two allocation schemes for CloudSicle, \emph{SingleJob} and \emph{SplitJob}.
+Requests are scheduled in a first come first serve manner. We have defined two allocation schemes for CloudSicle, \emph{SingleJob} and \emph{SplitJob}.
 \subsubsection{SingleJob} 
 \emph{SingleJob} is a straightforward allocation policy that will simply use one Slave to process the entire request. The Master will pass all the files of the JobMetaData to the DownloadJob of the Slave.
 \subsubsection{SplitJob}
@@ -254,6 +254,8 @@ on each of the jobs.
 We used the Monitor to get our experimental results (as will be presented in \autoref{sec:setup}).
 
 \subsection{Implementation}
+We have implemented a proof of concept of our design. It is written in Java, and can be found on Github\footnote{\url{https://github.com/ChrisTitos/CloudSicle}}.
+
 The CloudSicle project distributes three runnable \emph{.jar} files.
 These are \emph{client.jar}, \emph{master.jar} and \emph{slave.jar}.
 It also requires a user to specify his log-in credentials in a \emph{config.txt},
