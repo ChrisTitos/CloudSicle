@@ -1,8 +1,6 @@
 package org.cloudsicle.messages;
 
-import java.net.InetAddress;
 import java.util.HashMap;
-import java.util.List;
 
 import org.cloudsicle.master.slaves.SlaveVM;
 

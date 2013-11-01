@@ -24,7 +24,6 @@ import org.cloudsicle.messages.IMessage;
 import org.cloudsicle.messages.SoftExit;
 import org.cloudsicle.messages.StatusUpdate;
 import org.cloudsicle.slave.JobExecutor;
-import org.cloudsicle.slave.UnknownJobException;
 
 import com.jcraft.jsch.JSchException;
 

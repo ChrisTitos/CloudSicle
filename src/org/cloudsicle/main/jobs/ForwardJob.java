@@ -1,9 +1,6 @@
 package org.cloudsicle.main.jobs;
 
 import java.io.Serializable;
-import java.net.InetAddress;
-
-import org.cloudsicle.communication.INeedOwnIP;
 
 public class ForwardJob extends AbstractJob implements Serializable {
 

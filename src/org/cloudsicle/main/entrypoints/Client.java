@@ -12,13 +12,11 @@ import org.cloudsicle.client.gui.Frontend;
 import org.cloudsicle.communication.DefaultNetworkVariables;
 import org.cloudsicle.communication.FTPService;
 import org.cloudsicle.communication.IMessageHandler;
-import org.cloudsicle.communication.SocketListener;
 import org.cloudsicle.messages.Allocation;
 import org.cloudsicle.messages.IMessage;
 
 public class Client implements IMessageHandler {
 
-	private SocketListener listener;
 	private Session s;
 
 	public static void main(String[] args) throws IOException {
@@ -36,7 +34,7 @@ public class Client implements IMessageHandler {
 
 		s = new Session();
 		if (args.length > 0 && args[0].equals("test")) {
-			testScaling(args[1]);
+			testMakespan(args[1]);
 		} else {
 			Frontend.launch(s);
 		}
