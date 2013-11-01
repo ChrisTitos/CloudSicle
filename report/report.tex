@@ -187,7 +187,7 @@ Requests are scheduled in a first come first serve manner. We have defined two a
 
 The ForwardJob of the "intermediate" Slaves will pass the result to the Slave that is designated by the Master to produce the final results. This final Slave will use the WaitForResults job to wait until all other Slaves have sent their partial results. It will then combine and compress as usual and forward the final result to the Client.
 
-This approach bears similarity to a MapReduce computation.
+This approach bears similarity to a MapReduce computation \cite{MapReduce}.
 Depending on the strategy an arbitrary amount of distinct
 layers can be introduced. This means CloudSicle can simulate
 a MapReduce computation with two distinct mapping layers for
@@ -491,17 +491,24 @@ Eddie Kohler
 \newblock {\url{http://www.lcdf.org/gifsicle/}},
 \newblock {Last retrieved October 30 2013}
 
-\bibitem{opennebulaapi}
-Open Nebula
-\newblock {\em Java OCA API 2.0},
-\newblock {\url{http://opennebula.org/documentation:archives:rel2.0:java}},
-\newblock {Last retrieved October 30 2013}
+\bibitem{MapReduce}
+Dean, J., \& Ghemawat, S.  
+\newblock {2008}.
+\newblock {\em MapReduce: simplified data processing on large clusters}. 
+\newblock {Communications of the ACM, 51(1), 107-113}.
 
 \bibitem{das4}
 University of Amsterdam
 \newblock {\em DAS-4 Overview},
 \newblock {\url{http://www.cs.vu.nl/das4/}},
 \newblock {Last retrieved October 30 2013}
+
+\bibitem{opennebulaapi}
+Open Nebula
+\newblock {\em Java OCA API 2.0},
+\newblock {\url{http://opennebula.org/documentation:archives:rel2.0:java}},
+\newblock {Last retrieved October 30 2013}
+
 \end{thebibliography}
 %
 %%---------------------------------------------------------------------------%%
