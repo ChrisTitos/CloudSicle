@@ -393,11 +393,6 @@ files / hour&554&2182&2432&9000&24000\\\hline
 \end{table}
 
 \subsection{Experiment 2: Scaling}
-One of the most important requirements of CloudSicle is the autoscaling of VM resources. To evaluate the autoscaling capabilities of CloudSicle we needed to simulate a semi realistic workload over a certain time span. We do this by generating 20 requests (of the medium workload) at random time intervals between 1 and 30 seconds.
-
-\autoref{fig:scaling} shows the scaling of the resources over time. We see the total amount of VMs in the systems scales well with the number of jobs running. There is a nice buffer of available VMs, especially during periods where there are multiple VMs running at the same time. This would suggest that during consistent high request levels, CloudSicle will scale up accordingly. Scaling down is also shown in intervals 404 to 443. Another observation is the fact that jobs rarerely stay in the job queue of the Scheduler for more than a second.
-
-
 \begin{figure*}[ht]
 \begin{center}
 \begin{adjustwidth}{}{}
@@ -409,8 +404,13 @@ One of the most important requirements of CloudSicle is the autoscaling of VM re
 \end{center}
 \end{figure*}
 
+One of the most important requirements of CloudSicle is the autoscaling of VM resources. To evaluate the autoscaling capabilities of CloudSicle we needed to simulate a semi realistic workload over a certain time span. We do this by generating 20 requests (of the medium workload) at random time intervals between 1 and 30 seconds.
+
+\autoref{fig:scaling} shows the scaling of the resources over time. We see the total amount of VMs in the systems scales well with the number of jobs running. There is a nice buffer of available VMs, especially during periods where there are multiple VMs running at the same time. This would suggest that during consistent high request levels, CloudSicle will scale up accordingly. Scaling down is also shown in intervals 404 to 443. Another observation is the fact that jobs rarerely stay in the job queue of the Scheduler for more than a second.
+
 
 \begin{table}
+\label{tab:exp2vms1}
 \caption{The created VMs during experiment 2. The utilization is calculated by multiplying the average running time of a request (59 s)  by the number of requests a VM has processed. Because we take the average request time, the utilization of VM \#39154 is too high.}
 \begin{tabularx}{92mm}{|l||X|X|X|X|X|}
 \hline 
@@ -434,10 +434,11 @@ VM ID & Running/ Charged Time & Requests Processed & Utilization & Costs \\
 
 
 \begin{table}
+\label{tab:exp2vms2}
 \caption{Overview of VM usage metrics for Experiment 2}
 \begin{tabularx}{92mm}{|l||X|X|}
 \hline 
-Total Running time:	& 2065 s \\
+Total running time:	& 2065 s \\
 \hline 
 Average running Time & 344 s \\
 \hline 
@@ -453,6 +454,8 @@ Cost per request & \euro{0,03} \\
 \hline 
 \end{tabularx}
 \end{table}
+
+Tables \ref{tab:exp2vms1} and \ref{tab:exp2vms2} show more data on the usage of the VMs. We see in Table \ref{tab:exp2vms1} that during this experiment the system created six VMs, that have an average lifespan of 344 seconds. The average utilization, ie how much time the VM is actually spending on jobs, of the VMs is around 58%. Because Amazon uses one hour increments, the costs for all the VMs are the same.
 
 \section{Evaluation}
 \label{sec:eval}
