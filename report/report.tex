@@ -39,7 +39,7 @@ University of Technology (TUDelft)}}
 %\thispagestyle{plain}\pagestyle{plain}
 
 \begin{abstract}
-This report shows CloudSicle.An IaaS-based implementation of Gifsicle,
+This report presents CloudSicle, an IaaS-based implementation of Gifsicle,
 for the creation of animated \emph{.gif} images. We show
 the modular framework that makes up CloudSicle and some possible
 strategies that could be made for it. The results of
@@ -94,7 +94,7 @@ The structure of this report will be as follows:
 \label{sec:require}
 In this section we will first provide some background information concerning CloudSicle. Following this we will list the requirements we have formulated  together with \textbf{WantCloud BV}.
 
-Animated \textit{.gif}s are a popular internet phenomenon. These images usually are short in duration. Long animated \textit{.gif}s result in a large file size and thus a large loading time online. The duration of an animated \textit{.gif} often is no more than a 2 to 6 seconds. At a framerate of 24 fps we assume the average number of frames of an animated \textit{.gif} is about a 100. We therefore choose this as the average workload per request CloudSicle has to work with.
+Animated \textit{.gif}s are a popular internet phenomenon. These images usually are short in duration. Long animated \textit{.gif}s result in a large file size and thus a large loading time online. The duration of an animated \textit{.gif} often is no more than a 2 to 6 seconds. At a framerate of 24 fps we assume the average number of frames of an animated \textit{.gif} is about a 100 frames. We therefore choose this as the average workload per request CloudSicle has to work with.
 
 As mentioned in the previous section we designed CloudSicle 
 for future deployment in a large setting. This means that CloudSicle
@@ -124,7 +124,7 @@ possible. Creating animated \textit{.gif}s is fast, and thus the overhead of the
 
 The summarization of our requirements is therefore as follows:
 \begin{LaTeXdescription}
-\item[Automation] The system should handle the resource management autonomously. \hfill \
+\item[Automation] The system should handle  resource management autonomously. \hfill \
 \item[Intelligent Scaling] The system should scale up under high pressure, and scale down under low pressure \hfill \
 \item[Responsiveness] The response time and makespan should be kept minimal. \hfill \
 \item[Job Allocation] Optimal job partitioning over VMs to ensure that VMs are not inactive during their entire lifespan.\hfill \
@@ -134,13 +134,8 @@ The summarization of our requirements is therefore as follows:
 
 \section{System Design}
 \label{sec:design}
-. In this section we will discuss the system 
-design and interactions between these actors and how they apply
-to the homonym features as requested by \textbf{WantCloud BV} 
-(\textit{Automation}, \textit{Elasticity}, \textit{Performance}, \textit{Reliability}, \textit{Monitoring}). 
-The visualization
-of this behavior is depicted in \autoref{fig:systemdesign} for
-reference. 
+. In this section we will first discuss the general architecture of CloudSicle, followed by an explanation on how CloudSicle deals with resource mangement, job allocation, and monitoring. Finally we will give some remarks on the implementation of CloudSicle
+
 
 \begin{figure}[h]
 \begin{center}
@@ -151,7 +146,7 @@ reference.
 \end{figure}
 
 \subsection{Architecture}
-As previously mentioned the CloudSicle software consists of one or more clients, all of which connect to a server which can allocate Virtual Machines. We will reference the server as the \textit{Master} and the Virtual Machines that it creates as \textit{Slaves}, \textit{Slave VMs} or just \textit{VMs}. The Client, Master and Slaves communicate through structured messages. The application flow is started by a Client sending a request to the Master. This request contains a list of files (as well as data such as the number of files and the total file size) that the client wants to have combined. The Master maintains a job queue, in which all incoming requests are stored before they are scheduled. The Scheduler will select the request at the head of the queue and will then allocate one or more VMs from the Resource Pool to process this request according to some allocation policy. Once the Slave is done, it will send the resulting file back to the Client.
+The general overview of the architecture of CloudSicle can be seen in \autoref{fig:systemdesign}. CloudSicle consists of one or more clients, all of which connect to a server which can allocate Virtual Machines. We will reference the server as the \textit{Master} and the Virtual Machines that it creates as \textit{Slaves}, \textit{Slave VMs} or just \textit{VMs}. The Client, Master and Slaves communicate through structured messages. The application flow is started by a Client sending a request to the Master. This request contains a list of files (as well as data such as the number of files and the total file size) that the client wants to have combined. The Master maintains a job queue, in which all incoming requests are stored before they are scheduled. The Scheduler will select the request at the head of the queue and will then allocate one or more VMs from the Resource Pool to process this request according to some allocation policy. Once the Slave is done, it will send the resulting file back to the Client.
 
 We define several types of messages that can be passed between Client, Master and Slaves.
 \begin{LaTeXdescription}
@@ -169,7 +164,7 @@ Slave attempts to download them.
  The second way to receive input files is using a passive mechanism with a WaitForResultsJob, where the Slave waits for all the input files to be sent over by
 other Slaves before undertaking action. This is also the only time a Slave will every have to wait before executing its jobs.
 \subsubsection{CombineJob}
-The CombineJob will process the downloaded input files with \emph{Gifsicle} and stream the output to the Slave's disk.
+The CombineJob will process the downloaded input files with \emph{Gifsicle} and store the output to the Slave's disk.
 \subsubsection{CompressJob}
 The result of the CombineJob might be further processed by compressing it into a so-called \textit{Tarball}. This is done before the result is sent back to the Client to minimize the network pressure of sending data on the outbound line of the data center. The Master can issue this compression using the CompressJob.
 \subsubsection{ForwardJob}
@@ -187,7 +182,7 @@ The Master maintains a Resource Pool consisting of Slave VMs. The pool has three
 
 We already mentioned the short nature of the jobs that CloudSicle requests have. When requests are sparse, the overhead of creating a new VM every time would be too large. We therefore make sure we always have one running VM instance in our resource pool. If a request arrives while all VMs are busy, we create a new VM. The scheduler will then wait until a VM becomes available. This could be a busy VM that has finished in the meantime, or the newly created VM that has finished booting. When a VM is done with its Activity it will added back to \emph{AvailableVMs} list. 
 
-To ensure scaling down, after a VM is done with an Activity, the Master will wait a certain amount of time before shutting down the VM and removing it from the Resource Pool. Note that this only happens when a VM is done with an Activity. If it has yet to execute something, it will remain active. Because we always have at least one VM in the pool, and jobs are short, making the need for extra VMs low, the timeout can be very short. In  our proof of concept implementation, we set this time out to 6 seconds. In our experiments we show that this value yields good results.
+To ensure scaling down, after a VM is done with an Activity, the Master will wait a certain amount of time before shutting down the VM and removing it from the Resource Pool. Note that this only happens when a VM is done with an Activity. If it has yet to execute something, it will remain active. Because we always have at least one VM in the pool, and jobs are short, making the need for extra VMs low, the timeout can be very short. In  our proof of concept implementation, we set this time out to 6 seconds. In our experiments we evaluate if this yields good results.
 
 \subsection{Job Allocation}
 Requests are scheduled in a first come first serve manner. We have defined two allocation schemes for CloudSicle, \emph{SingleJob} and \emph{SplitJob}.
@@ -278,7 +273,7 @@ in the same folder and then run the \emph{client.jar}. The client will
 be presented by a small interface that allows him to select files, the DAS-4
 server entry point and send his (automaticly inferred) JobMetaData to the master.
 When the activity has been processed the resulting \emph{.tar.gz} compressed
-folder will appear in the client's folder.
+file will appear in the client's folder.
 
 The master will be deployed by sending the \emph{master.jar}, the \emph{slave.jar}
 and the \emph{config.txt} to the DAS-4 server. The service is then started by
@@ -298,7 +293,7 @@ the cost if the Amazon EC2 rate of 10 Eurocents per
 hour were used per file.
 
 \subsection{Experimental setup}
-Our system was deployed on the DAS-4 cluster\cite{das4}.
+Our system was deployed on the DAS-4 cluster \cite{das4}.
 For Virtual Machine monitoring we made use of the 
 Java OpenNebula Cloud API \cite{opennebulaapi}. Virtual Machines are created using the \texttt{centos-smallnet-qcow2} image available on DAS-4.
 
@@ -312,8 +307,8 @@ multiple of the same file being fed into the system, each exactly 54870 bytes in
 Due to complications in the implemenation phase, we were
 only able to test the \emph{SingleJob} strategy.
 
-\subsection{Experiment 1: Makespans}
-In the first experiment we measured the makespans of 
+\subsection{Experiment 1: Makespan}
+In the first experiment we measured the makespan of 
 different activity sizes. We created datasets of different
 sizes with the same file. The sizes we created are:
 \begin{LaTeXdescription}
@@ -334,8 +329,8 @@ is that the time it takes per file to handle a job decreases from
 inverse exponential approximation of this data we see that the algorithm
 becomes 'efficient' (second order derivative is 0) at about 500 input files.
 
-We can observe from \autoref{fig:makespanexpl} is that smaller jobs
-are prodominantly defined by the time it takes to forward their
+We can observe from \autoref{fig:makespanexpl} that smaller jobs
+are predominantly defined by the time it takes to forward their
 result, accounting for about 50\% of the job. As the job gets
 bigger, we see that this shifts to the downloading taking up
 most of the time of the job, taking again about 50\% of the job.
@@ -409,9 +404,9 @@ files / hour&554&2182&2432&9000&24000\\\hline
 \end{center}
 \end{figure*}
 
-One of the most important requirements of CloudSicle is the autoscaling of VM resources. To evaluate the autoscaling capabilities of CloudSicle we needed to simulate a semi realistic workload over a certain timespan. We do this by generating 20 requests (of the medium workload) at random time intervals between 1 and 30 seconds.
+One of the most important requirements of CloudSicle is the autoscaling of VM resources. To evaluate the autoscaling capabilities of CloudSicle we needed to simulate a semi realistic workload over a certain timespan. We do this by generating 20 requests (of the medium size dataset) at random time intervals between 1 and 30 seconds.
 
-\autoref{fig:scaling} shows the scaling of the resources over time. We see the total amount of VMs in the systems scales well with the number of jobs running. There is a nice buffer of available VMs, especially during periods where there are multiple VMs running at the same time. This would suggest that during consistent high request levels, CloudSicle will scale up accordingly. Scaling down is also shown in intervals 404 to 443. Another observation is the fact that jobs rarerely stay in the job queue of the Scheduler for more than a second.
+\autoref{fig:scaling} shows the scaling of the resource pool over time. We see the total amount of VMs in the systems scales well with the number of jobs running. There is a nice buffer of available VMs, especially during periods where there are multiple VMs running at the same time. This would suggest that during consistent high request levels, CloudSicle will scale up accordingly. Scaling down is also shown in intervals 404 to 443. Another observation is the fact that jobs rarely stay in the job queue of the Scheduler for more than a second.
 
 
 \begin{table}
@@ -460,7 +455,7 @@ Cost per request & \euro{0,03} \\
 \end{tabularx}
 \end{table}
 
-Tables \ref{tab:exp2vms1} and \ref{tab:exp2vms2} show more data on the usage of the VMs. We see in Table \ref{tab:exp2vms1} that during this experiment the system created six VMs, that have an average lifespan of 344 seconds. The average utilization, ie how much time the VM is actually spending on jobs, of the VMs is around 58\%. Because Amazon uses one hour increments, the costs for all the VMs are the same.
+Tables \ref{tab:exp2vms1} and \ref{tab:exp2vms2} show more data on the usage of the VMs. We see in Table \ref{tab:exp2vms1} that during this experiment the system created six VMs, which have an average lifespan of 344 seconds. The average utilization of the VMs, ie how much time the VM is actually spending on jobs, is around 58\%. Because Amazon uses one hour increments, the costs for all the VMs are the same.
 
 \section{Evaluation}
 \label{sec:eval}
@@ -545,7 +540,7 @@ If WantCloud BV wants to continue with this proof of concept, we would like to i
 \begin{itemize}
 \item Implement the SplitJob allocation policy, and evaluate its benefits compared to the default policy.
 \item Improve the performance of the downloading and uploading of files. One could for example compress the set of files the Client sends to the Slave.
-\item Creating a full API shell around Gifsicle so the user can make use of all the functionality and options gifsicle offers.
+\item Creating a full API shell around Gifsicle so the user can make use of all the functionality and options Gifsicle offers.
 \end{itemize}
 
 \section*{Acknowledgments}
