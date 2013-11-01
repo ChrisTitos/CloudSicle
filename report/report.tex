@@ -315,9 +315,24 @@ for each of these datasets. For the medium and jumbo datasets
 we have also given a more detailed insight into the specific
 jobs that are executed in \autoref{fig:makespanexpl}.
 
+An interesting observation to be made from \autoref{fig:makespans},
+is that the time it takes per file to handle a job decreases from
+6.5 seconds per file to 0.15 seconds per file (see \autoref{tab:makespans}). If we make a rough
+inverse exponential approximation of this data we see that the algorithm
+becomes 'efficient' (second order derivative is 0) at about 500 input files.
+
+We can observe from \autoref{fig:makespanexpl} is that smaller jobs
+are prodominantly defined by the time it takes to forward their
+result, accounting for about 50\% of the job. As the job gets
+bigger, we see that this shifts to the downloading taking up
+most of the time of the job, taking again about 50\% of the job.
+What we can also observe is that compression time takes up
+a larger percentage of the job time as it gets bigger, waiting
+time and combination time stay about the same and forward time shrinks percentually.
+
 \begin{figure}[h]
 \begin{center}
- \includegraphics[trim=50 0 0 0,keepaspectratio=true,scale=0.8]{makespan}
+ \includegraphics[trim=0 0 0 0,keepaspectratio=true,scale=0.8]{makespan}
 \caption{The average makespan of a single job}
 \label{fig:makespans}
 \end{center}
@@ -325,7 +340,7 @@ jobs that are executed in \autoref{fig:makespanexpl}.
 
 \begin{figure}[h]
 \begin{center}
- \includegraphics[trim=50 0 0 0,keepaspectratio=true,scale=0.8]{jobdurations}
+ \includegraphics[trim=0 0 0 0,keepaspectratio=true,scale=0.8]{jobdurations}
 \caption{The makespan of the medium and jumbo workload, average time spent per job type for the activity}
 \label{fig:makespanexpl}
 \end{center}
@@ -341,7 +356,7 @@ jobs that are executed in \autoref{fig:makespanexpl}.
 \setlength{\tabcolsep}{.16667em}
 \begin{tabularx}{92mm}{|l||X|X|X|X|X|}
 \hline
-              &Small&Medium&Large&Jumbo&Immense\\\hline\hline
+Observed &Small&Medium&Large&Jumbo&Immense\\\hline\hline
 files&2&20&100&1000&6739\\\hline
 total size (MB)&0.1&1.1&5.5&54.8&369.8\\\hline
 makespan (s)&13&33&148&405&1015\\\hline
@@ -355,7 +370,7 @@ makespan (s)&13&33&148&405&1015\\\hline
 \setlength{\tabcolsep}{.16667em}
 \begin{tabularx}{92mm}{|l||X|X|X|X|X|}
 \hline
-              &Small&Medium&Large&Jumbo&Immense\\\hline\hline
+Inferred &Small&Medium&Large&Jumbo&Immense\\\hline\hline
 time per file (s)&6.5&1.65&1.48&0.40&0.15\\\hline
 files / hour&554&2182&2432&9000&24000\\\hline
 \pbox{2.5cm}{EC2 cost/file (10\textsuperscript{-4} EUR)}&1.80&0.45&0.41&0.11&0.04\\\hline
