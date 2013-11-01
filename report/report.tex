@@ -7,6 +7,9 @@
 \usepackage{pbox}
 \usepackage{tabularx}
 
+\def\sectionautorefname{Section}
+\def\figureautorefname{Figure}
+
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
@@ -367,6 +370,9 @@ files / hour&554&2182&2432&9000&24000\\\hline
 \end{table}
 
 \subsection{Experiment 2: Scaling}
+One of the most important requirements of CloudSicle is the autoscaling of VM resources. To evaluate the autoscaling capabilities of CloudSicle we needed to simulate a semi realistic worload over a certain time span. We do this by generating 20 requests (of the medium workload) at random time intervals between 1 and 30 seconds.
+
+\autoref{fig:scaling} shows the scaling of the resources over time. We see the total amount of VMs in the systems scales well with the number of jobs running. There is a nice buffer of available VMs, especially during periods where there are multiple VMs running at the same time. This would suggest that during consistent high request levels, CloudSicle will scale up accordingly. Scaling down is also shown in intervals 404 to 443. Another observation is the fact that jobs rarerely stay in the job queue of the Scheduler for more than a second.
 
 \begin{figure*}[b]
 \begin{center}
@@ -375,6 +381,7 @@ files / hour&554&2182&2432&9000&24000\\\hline
  \includegraphics{scaling.eps}
 } \end{adjustwidth}
 \caption{The behaviour of CloudSicles resource scaling}
+\label{fig:scaling}
 \end{center}
 \end{figure*}
 
