@@ -438,6 +438,10 @@ Users (Millions)&Time (Hours)&Cost(EUR)\\\hline\hline
 For all of the possible combinations of days, weeks, months and years in combination
 with millions of users we can also calculate the cost. If we filter out the impossible
 amounts of hours per timeframe we get the results of \autoref{tab:extracost}.
+These calculation assume the worst case scenario where Virtual Machines get
+all of their work at once and the rest of the time the buffer Virtual Machine
+remains powered on. This causes maximum inefficiency in CloudSicle's buffering
+scheme.
 
 \begin{table}[htb]
 \caption{Extrapolated Cost Per Day}
